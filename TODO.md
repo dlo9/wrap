@@ -1,3 +1,2 @@
 - Allow multiple triggers on a single `wrapper`
 - Variables/template support
-- Scan through all triggers in the config and run the most specific (longest) one

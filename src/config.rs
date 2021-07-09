@@ -24,7 +24,7 @@ pub struct Config {
 const CONFIG_FILE_NAME: &'static str = "wrap";
 
 impl Config {
-    pub fn new(path: Option<PathBuf>) -> Result<Self, ConfigError> {
+    pub fn new(path: &Option<PathBuf>) -> Result<Self, ConfigError> {
         let mut s = config::Config::default();
 
         // Start off by merging in the global configuration file
