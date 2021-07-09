@@ -1,0 +1,10 @@
+wrappers:
+  Run a shell command:
+    trigger: ["sh"]
+    command: sh
+    args:
+      - -c
+  Echo something:
+    trigger: ["echo"]
+    command: echo
+    args: []
