@@ -6,7 +6,12 @@ use log::info;
 use crate::config::Config;
 
 #[derive(structopt::StructOpt)]
-#[structopt(rename_all = "kebab", rename_all_env = "screaming-snake", setting = structopt::clap::AppSettings::ColoredHelp)]
+#[structopt(
+    rename_all = "kebab",
+    rename_all_env = "screaming-snake",
+    setting = structopt::clap::AppSettings::ColoredHelp,
+    setting = structopt::clap::AppSettings::TrailingVarArg,
+)]
 struct Args {
     /// The file to publish to rabbit
     #[structopt(env, short, long)]
@@ -19,6 +24,8 @@ struct Args {
     /// Positional arguments to pass to the underlying command
     args: Vec<String>,
 }
+
+const DRY_RUN_GLOBAL: &str = "--dry-run";
 
 #[paw::main]
 fn main(args: Args) -> Result<()> {
@@ -35,11 +42,24 @@ fn main(args: Args) -> Result<()> {
             info!("Trigger detected for '{}'", description);
 
             // Remove the trigger to get the remaining positional arguments
-            let append_args = &args.args[wrapper.trigger.len()..];
+            let mut dry_run = args.dry_run;
+            let append_args = args.args[wrapper.trigger.len()..]
+                .into_iter()
+                .filter(|s|
+                    // Hacky way to allow the dry-run flag to be specified globally
+                    match s.as_str() {
+                        DRY_RUN_GLOBAL => {
+                            dry_run = true;
+                            false
+                        }
+                        _ => true
+                    }
+                );
+
             //debug!("Trigger detected for '{}'", append_args);
             let command_args: Vec<&String> = wrapper.args.iter().chain(append_args).collect();
 
-            if args.dry_run {
+            if dry_run {
                 let command_args = command_args.iter()
                     .map(|s| format!("\"{}\"", s))
                     .collect::<Vec<String>>()
