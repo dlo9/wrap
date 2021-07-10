@@ -1,10 +1,12 @@
 wrappers:
   Run a shell command:
-    trigger: ["sh"]
+    triggers:
+      - ["sh"]
     command: sh
-    args:
+    arguments:
       - -c
   Echo something:
-    trigger: ["echo"]
+    triggers:
+      - ["echo"]
     command: echo
-    args: []
+    arguments: []

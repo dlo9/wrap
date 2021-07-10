@@ -1,19 +1,16 @@
-use std::{
-    collections::BTreeMap,
-    path::PathBuf,
-};
 use config::{
     ConfigError,
     File,
     Environment,
 };
 use serde_derive::Deserialize;
+use std::{collections::BTreeMap, path::PathBuf};
 
 #[derive(Debug, Deserialize)]
 pub struct Wrapper {
-    pub trigger: Vec<String>,
+    pub triggers: Vec<Vec<String>>,
     pub command: String,
-    pub args: Vec<String>,
+    pub arguments: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
