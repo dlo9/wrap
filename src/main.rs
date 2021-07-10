@@ -5,7 +5,7 @@ use anyhow::{
     Result
 };
 use std::path::PathBuf;
-use log::info;
+use log::{debug, info};
 use crate::config::Config;
 
 #[derive(structopt::StructOpt)]
@@ -42,12 +42,21 @@ fn main(args: Args) -> Result<()> {
 
     // Find the wrapper with the longest matching trigger
     let wrapper = config.wrappers.into_iter()
-        .filter(|(_, wrapper)| args.args.starts_with(&wrapper.trigger))
-        .inspect(|(description, _)| info!("Trigger matches wrapper '{}'", description))
-        .max_by_key(|(_, wrapper)| wrapper.trigger.len());
+        // Destructure
+        .map(|(description, wrapper)| (description, wrapper.triggers, wrapper.command, wrapper.arguments))
+        // Get the longest matching trigger for each matching wrapper
+        .filter_map(|(description, triggers, command, arguments)| {
+            let max = triggers.into_iter()
+                                                .filter(|trigger| args.args.starts_with(&trigger))
+                                                .max_by_key(|trigger| trigger.len());
+            max.map(|trigger| (description, trigger, command, arguments))
+        })
+        .inspect(|(description, ..)| debug!("Trigger matches wrapper '{}'", description))
+        // Get the single longest trigger
+        .max_by_key(|(_, trigger, ..)| trigger.len());
 
     // Exit when no trigger is found
-    let (description, wrapper) = if wrapper.is_some() {
+    let (description, trigger, command, arguments) = if wrapper.is_some() {
         wrapper.unwrap()
     } else {
         bail!("No trigger found: {:?}", args.args);
@@ -57,7 +66,7 @@ fn main(args: Args) -> Result<()> {
 
     // Remove the trigger to get the remaining positional arguments
     let mut dry_run = args.dry_run;
-    let append_args = args.args[wrapper.trigger.len()..]
+    let append_args = args.args[trigger.len()..]
         .into_iter()
         .filter(|s|
             // Hacky way to allow the dry-run flag to be specified globally
@@ -71,7 +80,7 @@ fn main(args: Args) -> Result<()> {
         );
 
     //debug!("Trigger detected for '{}'", append_args);
-    let command_args: Vec<&String> = wrapper.args.iter().chain(append_args).collect();
+    let command_args: Vec<&String> = arguments.iter().chain(append_args).collect();
 
     if dry_run {
         let command_args = command_args.iter()
@@ -79,10 +88,10 @@ fn main(args: Args) -> Result<()> {
             .collect::<Vec<String>>()
             .join(" ");
 
-        println!("{} {}", wrapper.command, command_args);
+        println!("{} {}", command, command_args);
         return Ok(())
     } else {
-        let error = exec::Command::new(&wrapper.command)
+        let error = exec::Command::new(&command)
             .args(&command_args)
             .exec();
 
