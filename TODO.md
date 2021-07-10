@@ -1,2 +1,1 @@
-- Allow multiple triggers on a single `wrapper`
 - Variables/template support
