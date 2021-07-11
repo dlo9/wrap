@@ -1,1 +1,3 @@
 - Variables/template support
+- Pass-through a trigger flag if specified twice (to work around conflicting triggers/flags)
+- Allow multiple triggers for a single alias to append arguments
