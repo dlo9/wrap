@@ -10,3 +10,19 @@ wrappers:
       - ["echo"]
     command: echo
     arguments: []
+  List file details:
+    triggers:
+      - ["l", "--detailed"]
+      - ["l", "-d"]
+    command: ls
+    arguments: ["-l", "-a"]
+  List directory:
+    triggers:
+      - ["l", "--dir"]
+    command: ls
+    arguments: ["-l", "-d"]
+  ls:
+    triggers:
+      - ["l"]
+    command: ls
+    arguments: []
