@@ -1,3 +1,5 @@
 - Variables/template support
 - Pass-through a trigger flag if specified twice (to work around conflicting triggers/flags)
 - Allow multiple triggers for a single alias to append arguments
+- Set logging level in config file
+- Allow argument overrides on invocation (e.g., kubectl uses a defaul namespace, but can be overridden)
