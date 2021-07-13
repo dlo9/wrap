@@ -1,4 +1,5 @@
 mod config;
+mod wrapper;
 
 use anyhow::{
     bail,
@@ -37,8 +38,11 @@ fn main(args: Args) -> Result<()> {
 
     let config = Config::new(&args.config)?;
     if args.args.is_empty() {
-        bail!("No positional arguments given");
+        bail!("No alias given");
     }
+
+    let given_alias = args.args.remove(0);
+    //let config.aliases.into_iter().filter(|a| a.alias = given_alias);
 
     // Find the wrapper with the longest matching trigger
     let wrapper = config.wrappers.into_iter()
