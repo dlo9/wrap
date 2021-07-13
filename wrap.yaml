@@ -1,28 +1,27 @@
-wrappers:
-  Run a shell command:
-    triggers:
-      - ["sh"]
+aliases:
+  - alias: l
+    command: ls
+    wrappers:
+      List file details:
+        triggers:
+          - ["--detailed"]
+          - ["-d"]
+        arguments: ["-l", "-a"]
+      List directory:
+        triggers:
+          - ["l", "--dir"]
+        arguments: ["-l", "-d"]
+  - alias: sh
     command: sh
-    arguments:
-      - -c
-  Echo something:
-    triggers:
-      - ["echo"]
+    wrappers:
+      Run a shell command:
+        triggers:
+          - []
+        arguments: ["-c"]
+  - alias: e
     command: echo
-    arguments: []
-  List file details:
-    triggers:
-      - ["l", "--detailed"]
-      - ["l", "-d"]
-    command: ls
-    arguments: ["-l", "-a"]
-  List directory:
-    triggers:
-      - ["l", "--dir"]
-    command: ls
-    arguments: ["-l", "-d"]
-  ls:
-    triggers:
-      - ["l"]
-    command: ls
-    arguments: []
+    wrappers:
+      Echo something:
+        triggers:
+          - []
+        arguments: []
