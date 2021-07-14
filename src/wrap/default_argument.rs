@@ -5,7 +5,7 @@ use serde_derive::Deserialize;
 #[serde(rename_all = "kebab-case")]
 struct DefaultArgument {
     pub key: String,
-    pub value: String,
+    pub value: Option<String>,
     pub cleared_by: HashSet<String>,
 }
 
@@ -17,7 +17,10 @@ impl DefaultArgument {
         if arguments.iter().all(|clearing_key| !self.cleared_by.contains(clearing_key)) {
             // No clearing key found, add the key/value
             arguments.push(self.key);
-            arguments.push(self.value);
+
+            if let Some(value) = self.value {
+                arguments.push(value);
+            }
         }
     }
 }
