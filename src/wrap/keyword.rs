@@ -24,7 +24,7 @@ impl Keyword {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct Keywords(Vec<Keyword>);
 
 impl Keywords {

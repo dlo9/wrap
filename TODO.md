@@ -1,3 +1,2 @@
 - Variables/template support
 - Set logging level in config file (not important since there are no logs right now?)
-- Automatic alias installer via --alias and --unalias
