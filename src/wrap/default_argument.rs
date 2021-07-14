@@ -25,8 +25,9 @@ impl DefaultArgument {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Default, Deserialize)]
 pub struct DefaultArguments(Vec<DefaultArgument>);
+//type DefaultArguments = Vec<DefaultArgument>;
 
 impl DefaultArguments {
     pub fn apply(self, arguments: &mut Vec<String>) {

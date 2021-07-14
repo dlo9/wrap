@@ -1,7 +1,11 @@
 # Invoking `wrap install` will automatically install these aliases in your shell.
 # To uninstall, run `wrap uninstall`. Both may require restarting your shell to take effect.
+#
 # Supported shells:
 #   - fish
+#
+# All aliases have a `--dry-run` flag which, when invoked, will print the command instead of running it
+#
 aliases:
   - alias: k
     program: kubectl
@@ -9,9 +13,9 @@ aliases:
     # These are the default arguments
     # Arguments & values can be overridden when invoked
     arguments:
-      - key: "-n"  # Required
-        value: "default-namespace"  # Optional
-        cleared-by: ["-n", "-A"]  # If -n or -A is specified, the default argument is ignored
+      - key: -n  # Required
+        value: default-namespace  # Optional
+        cleared-by: [-n, -A]  # If -n or -A is specified, the default argument is ignored
 
     # Argument `keywords`. If the keyword is found after the alias,
     # it will be replaced with one or more argument replacements.
@@ -20,9 +24,9 @@ aliases:
 
         # The first argument matching a key will be replaced.
         # After the first match, these keys will be completely ignored
-      - keys: ["--dev", "--development"]
+      - keys: [--dev, --development]
         # The key will be replaced with these values where the key was found
-        values: ["--context", "my_development_context"]
+        values: [--context, my_development_context]
 
-      - keys: ["--kafka"]
-        values: ["-n", "kafka-namespace"]
+      - keys: [--kafka]
+        values: [-n, kafka-namespace]
