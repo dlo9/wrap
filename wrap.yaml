@@ -1,27 +1,28 @@
+# Invoking `wrap install` will automatically install these aliases in your shell.
+# To uninstall, run `wrap uninstall`. Both may require restarting your shell to take effect.
+# Supported shells:
+#   - fish
 aliases:
-  - alias: l
-    command: ls
-    wrappers:
-      List file details:
-        triggers:
-          - ["--detailed"]
-          - ["-d"]
-        arguments: ["-l", "-a"]
-      List directory:
-        triggers:
-          - ["l", "--dir"]
-        arguments: ["-l", "-d"]
-  - alias: sh
-    command: sh
-    wrappers:
-      Run a shell command:
-        triggers:
-          - []
-        arguments: ["-c"]
-  - alias: e
-    command: echo
-    wrappers:
-      Echo something:
-        triggers:
-          - []
-        arguments: []
+  - alias: k
+    program: kubectl
+
+    # These are the default arguments
+    # Arguments & values can be overridden when invoked
+    arguments:
+      - key: "-n"  # Required
+        value: "default-namespace"  # Optional
+        cleared-by: ["-n", "-A"]  # If -n or -A is specified, the default argument is ignored
+
+    # Argument `keywords`. If the keyword is found after the alias,
+    # it will be replaced with one or more argument replacements.
+    # This is not recursively executed
+    keywords:
+
+        # The first argument matching a key will be replaced.
+        # After the first match, these keys will be completely ignored
+      - keys: ["--dev", "--development"]
+        # The key will be replaced with these values where the key was found
+        values: ["--context", "my_development_context"]
+
+      - keys: ["--kafka"]
+        values: ["-n", "kafka-namespace"]
