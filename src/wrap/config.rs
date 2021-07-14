@@ -6,11 +6,12 @@ use config::{
 use serde_derive::Deserialize;
 use std::path::PathBuf;
 
-use super::alias::Alias;
+use super::alias::Aliases;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub aliases: Vec<Alias>,
+    #[serde(default)]
+    pub aliases: Aliases,
 }
 
 const CONFIG_FILE_NAME: &'static str = "wrap";
