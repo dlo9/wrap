@@ -1,13 +1,9 @@
-mod config;
-mod wrapper;
+mod wrap;
 
-use anyhow::{
-    bail,
-    Result
-};
+use anyhow::{Context, Result, bail};
 use std::path::PathBuf;
 use log::{debug, info};
-use crate::config::Config;
+use wrap::Config;
 
 #[derive(structopt::StructOpt)]
 #[structopt(
@@ -32,7 +28,7 @@ struct Args {
 const DRY_RUN_GLOBAL: &str = "--dry-run";
 
 #[paw::main]
-fn main(args: Args) -> Result<()> {
+fn main(mut args: Args) -> Result<()> {
     color_backtrace::install();
     pretty_env_logger::init();
 
@@ -41,65 +37,32 @@ fn main(args: Args) -> Result<()> {
         bail!("No alias given");
     }
 
-    let given_alias = args.args.remove(0);
-    //let config.aliases.into_iter().filter(|a| a.alias = given_alias);
+    // Determine if this is a dry run before we mutate the arguments
+    let dry_run = global_dry_run(&mut args.args) || args.dry_run;
 
-    // Find the wrapper with the longest matching trigger
-    let wrapper = config.wrappers.into_iter()
-        // Destructure
-        .map(|(description, wrapper)| (description, wrapper.triggers, wrapper.command, wrapper.arguments))
-        // Get the longest matching trigger for each matching wrapper
-        .filter_map(|(description, triggers, command, arguments)| {
-            let max = triggers.into_iter()
-                                                .filter(|trigger| args.args.starts_with(&trigger))
-                                                .max_by_key(|trigger| trigger.len());
-            max.map(|trigger| (description, trigger, command, arguments))
-        })
-        .inspect(|(description, ..)| debug!("Trigger matches wrapper '{}'", description))
-        // Get the single longest trigger
-        .max_by_key(|(_, trigger, ..)| trigger.len());
-
-    // Exit when no trigger is found
-    let (description, trigger, command, arguments) = if wrapper.is_some() {
-        wrapper.unwrap()
-    } else {
-        bail!("No trigger found: {:?}", args.args);
-    };
-
-    info!("Executing maximally specific wrapper '{}'", description);
-
-    // Remove the trigger to get the remaining positional arguments
-    let mut dry_run = args.dry_run;
-    let append_args = args.args[trigger.len()..]
+    let user_alias = args.args.remove(0);
+    let alias = config.aliases
         .into_iter()
-        .filter(|s|
-            // Hacky way to allow the dry-run flag to be specified globally
-            match s.as_str() {
-                DRY_RUN_GLOBAL => {
-                    dry_run = true;
-                    false
-                }
-                _ => true
-            }
-        );
-
-    //debug!("Trigger detected for '{}'", append_args);
-    let command_args: Vec<&String> = arguments.iter().chain(append_args).collect();
+        .find(|alias| alias == &user_alias)
+        .context("No matching alias found")?;
+    let command = alias.get_command(args.args);
 
     if dry_run {
-        let command_args = command_args.iter()
-            .map(|s| format!("\"{}\"", s))
-            .collect::<Vec<String>>()
-            .join(" ");
-
-        println!("{} {}", command, command_args);
-        return Ok(())
+        println!("{}", command);
+        Ok(())
     } else {
-        let error = exec::Command::new(&command)
-            .args(&command_args)
-            .exec();
+        let mut command: exec::Command = command.into();
+        Err(command.exec().into())
+    }
+}
 
-        return Err(error.into());
-
+// Returns true if the global dry-run flag was found in the arguments,
+// and then removes the flag so that it's no printed in the dry-run
+fn global_dry_run(arguments: &mut Vec<String>) -> bool {
+    if let Some(index) = arguments.iter().position(|argument| argument == DRY_RUN_GLOBAL) {
+        arguments.remove(index);
+        true
+    } else {
+        false
     }
 }

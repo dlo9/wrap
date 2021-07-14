@@ -4,18 +4,13 @@ use config::{
     Environment,
 };
 use serde_derive::Deserialize;
-use std::{collections::BTreeMap, path::PathBuf};
+use std::path::PathBuf;
 
-#[derive(Debug, Deserialize)]
-pub struct Wrapper {
-    pub triggers: Vec<Vec<String>>,
-    pub command: String,
-    pub arguments: Vec<String>,
-}
+use super::alias::Alias;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
-    pub wrappers: BTreeMap<String, Wrapper>,
+    pub aliases: Vec<Alias>,
 }
 
 const CONFIG_FILE_NAME: &'static str = "wrap";
