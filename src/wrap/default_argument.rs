@@ -16,11 +16,11 @@ impl DefaultArgument {
     fn apply(self, arguments: &mut Vec<String>) {
         if arguments.iter().all(|clearing_key| !self.cleared_by.contains(clearing_key)) {
             // No clearing key found, add the key/value
-            arguments.push(self.key);
-
             if let Some(value) = self.value {
-                arguments.push(value);
+                arguments.insert(0, value);
             }
+
+            arguments.insert(0, self.key);
         }
     }
 }
