@@ -6,9 +6,13 @@
 #
 # All aliases have a `--dry-run` flag which, when invoked, will print the command instead of running it
 #
+
+variables:
+  PROD_KUBECONFIG: ~/.kube/prod
+
 aliases:
   - alias: k
-    program: kubectl
+    program: default-namespace
 
     # These are the default arguments
     # Arguments & values can be overridden when invoked
@@ -27,6 +31,9 @@ aliases:
       - keys: [--dev, --development]
         # The key will be replaced with these values where the key was found
         values: [--context, my_development_context]
+
+      - keys: [--prod]
+        values: [--kubeconfig, $PROD_KUBECONFIG]
 
       - keys: [--kafka]
         values: [-n, kafka-namespace]
