@@ -6,10 +6,16 @@ use config::{
 use serde_derive::Deserialize;
 use std::path::PathBuf;
 
-use super::alias::Aliases;
+use super::{
+    alias::Aliases,
+    variable::Variables,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
+    #[serde(default)]
+    pub variables: Variables,
+    
     #[serde(default)]
     pub aliases: Aliases,
 }

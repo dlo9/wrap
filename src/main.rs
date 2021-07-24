@@ -6,7 +6,6 @@ mod shell;
 
 use anyhow::{Context, Result, bail};
 use std::path::PathBuf;
-use log::{debug, info};
 use wrap::Config;
 
 #[derive(structopt::StructOpt)]
@@ -47,7 +46,7 @@ fn main(mut args: Args) -> Result<()> {
     color_backtrace::install();
     pretty_env_logger::init();
 
-    let config = Config::new(&args.config)?;
+    let mut config = Config::new(&args.config)?;
 
     if args.alias {
         let aliases = config.aliases.get_aliases();
@@ -72,7 +71,7 @@ fn main(mut args: Args) -> Result<()> {
 
     let user_alias = args.args.remove(0);
     let alias = config.aliases.get_alias(&user_alias).context("No matching alias found")?;
-    let command = alias.get_command(args.args);
+    let command = alias.get_command(args.args, &mut config.variables)?;
 
     if dry_run {
         println!("{}", command);

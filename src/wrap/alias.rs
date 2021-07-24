@@ -1,6 +1,12 @@
+use anyhow::Result;
 use serde_derive::Deserialize;
 use std::cmp::PartialEq;
-use super::{command::Command, default_argument::DefaultArguments, keyword::Keywords};
+use super::{
+    command::Command,
+    default_argument::DefaultArguments,
+    keyword::Keywords,
+    variable::Variables,
+};
 
 #[derive(Debug, Deserialize)]
 pub struct Alias {
@@ -20,14 +26,15 @@ where S: AsRef<str> {
 }
 
 impl Alias {
-    pub fn get_command(self, mut arguments: Vec<String>) -> Command {
+    pub fn get_command(self, mut arguments: Vec<String>, variables: &mut Variables) -> Result<Command> {
         self.keywords.replace(&mut arguments);
         self.default_arguments.apply(&mut arguments);
+        let arguments = variables.apply(&arguments)?;
 
-        Command {
+        Ok(Command {
             program: self.program,
             arguments,
-        }
+        })
     }
 }
 

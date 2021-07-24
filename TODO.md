@@ -2,3 +2,5 @@
 - Set logging level in config file (not important since there are no logs right now?)
 - Support more shells for auto-install
 - Add config to add default argument at end instead of beginning
+- Github actions CI
+- Github actions binary releases
