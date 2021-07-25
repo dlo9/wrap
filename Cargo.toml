@@ -1,6 +1,6 @@
 [package]
 name = "wrap"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["David Orchard <if_coding@fastmail.com>"]
 edition = "2018"
 
@@ -27,3 +27,5 @@ anyhow = "1"
 
 # Logic
 exec = "0.3.1"
+pest = "2.0"
+pest_derive = "2.0"

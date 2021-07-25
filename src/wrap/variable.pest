@@ -1,0 +1,13 @@
+escape = { "\\" }
+tilde = { "~" }
+variable_indicator = { "$" }
+
+escapable = { (escape | tilde | variable_indicator) }
+escaped = { escape ~ escapable }
+not_escaped = { !escapable ~ ANY }
+literal = { escaped | not_escaped }
+
+variable_ident = { (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" )* }
+variable = { variable_indicator ~ (variable_ident | ("{" ~ variable_ident ~ "}")) }
+
+argument = { SOI ~ (literal | variable | tilde)* ~ EOI }

@@ -7,12 +7,25 @@
 # All aliases have a `--dry-run` flag which, when invoked, will print the command instead of running it
 #
 
+# Variables will be expanded when used as an argument value
+# Invoking an argument can be done with shell-like syntax:
+#   - Typical use: $MY_VARIABLE
+#   - Variable with text immediately following: ${MY_VARIABLE}_with_some_text
+#   - Tilde expansion: ~/file_in_my_home_directory.txt
+#
+# Variables in arguments can be from the environment or defined here. Environment
+# variables take precedence. If a variable does not exist, it will expand into the
+# empty string (similar to shell expansion).
 variables:
-  PROD_KUBECONFIG: ~/.kube/prod
+  KUBE_DIR: ~/.kube
+  # Variables can contain previously defined variables
+  PROD_KUBECONFIG: $KUBE_DIR/prod
+  # Or environment variables
+  CONFIG_DIR: $HOME/.config
 
 aliases:
   - alias: k
-    program: default-namespace
+    program: kubectl
 
     # These are the default arguments
     # Arguments & values can be overridden when invoked
@@ -25,7 +38,6 @@ aliases:
     # it will be replaced with one or more argument replacements.
     # This is not recursively executed
     keywords:
-
         # The first argument matching a key will be replaced.
         # After the first match, these keys will be completely ignored
       - keys: [--dev, --development]
