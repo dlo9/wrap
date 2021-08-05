@@ -2,7 +2,7 @@ use pest::Parser;
 use serde_derive::Deserialize;
 use std::{collections::HashMap, convert::TryFrom, env};
 use anyhow::{Context, Result};
-//use pest::Parser;
+use indexmap::IndexMap;
 use pest_derive::Parser;
 
 #[derive(Parser)]
@@ -50,13 +50,13 @@ impl ArgumentParser {
 }
 
 #[derive(Debug, Default, Deserialize)]
-#[serde(try_from = "HashMap<String, String>")]
+#[serde(try_from = "IndexMap<String, String>")]
 pub struct Variables(HashMap<String, String>);
 
-impl TryFrom<HashMap<String, String>> for Variables {
+impl TryFrom<IndexMap<String, String>> for Variables {
     type Error = anyhow::Error;
 
-    fn try_from(config_variables: HashMap<String, String>) -> Result<Variables> {
+    fn try_from(config_variables: IndexMap<String, String>) -> Result<Variables> {
         // Start with environment variables
         let mut variables: HashMap<String, String> = env::vars().collect();
 
