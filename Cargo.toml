@@ -12,7 +12,7 @@ enum_derive = "0.1.7"
 custom_derive = "0.1.7"
 
 # Config
-config = { version = "0.11", features = ["toml", "json", "yaml", "hjson", "ini", "ron", "json5", "preserve_order"] }
+config = { git = "https://github.com/mehcode/config-rs", commit = "052c9503c65ee66074d00e8885aa13e6831bf079", features = ["toml", "json", "yaml", "hjson", "ini", "ron", "json5", "preserve_order"] }
 dirs = "3.0.2"
 serde_derive = "1.0.126"
 serde = "1.0.126"
@@ -30,6 +30,3 @@ exec = "0.3.1"
 pest = "2.0"
 pest_derive = "2.0"
 indexmap = { version = "1.7.0", features = ["serde-1"] }
-
-[patch.crates-io]
-config = { git = "https://github.com/dlo9/config-rs" }
