@@ -15,7 +15,7 @@ use super::{
 pub struct Config {
     #[serde(default)]
     pub variables: Variables,
-    
+
     #[serde(default)]
     pub aliases: Aliases,
 }
@@ -23,17 +23,22 @@ pub struct Config {
 const CONFIG_FILE_NAME: &'static str = "wrap";
 
 impl Config {
-    pub fn new(path: &Option<PathBuf>) -> Result<Self, ConfigError> {
+    pub fn new<'a>(path_overrides: impl IntoIterator<Item = &'a PathBuf>) -> Result<Self, ConfigError> {
         let mut config = config::Config::builder();
 
-        // Start off by merging in the global configuration file
-        // TODO: linux only
-        config = config.add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
-
-        if let Some(path) = path {
-            // Use only the given config
+        // User `path_overrides` if it's not empty
+        let mut use_defaults = true;
+        for path in path_overrides {
+            use_defaults = true;
             config = config.add_source(File::with_name(&path.to_string_lossy()).required(true));
-        } else {
+        }
+
+        // Otherwise, use defult paths
+        if use_defaults {
+            // Start off by merging in the global configuration file
+            // TODO: linux only
+            config = config.add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
+
             // Add in the user's config
             // This doesn't use config_dir since it's a weird path on MacOS
             if let Some(path) = dirs::home_dir() {
