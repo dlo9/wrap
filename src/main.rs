@@ -23,9 +23,13 @@ struct Args {
     #[structopt(long)]
     alias: bool,
 
-    /// The file to publish to rabbit
+    /// The config files to read from
+    ///
+    /// If specified, the default config files will not be used,
+    /// and instead these config files will be merged with the first file
+    /// having the least precedence
     #[structopt(env, short, long)]
-    config: Option<PathBuf>,
+    config: Vec<PathBuf>,
 
     /// Print the command to be run
     #[structopt(short = "n", long, conflicts_with_all = &["alias", "unalias"])]
@@ -46,7 +50,7 @@ fn main(mut args: Args) -> Result<()> {
     color_backtrace::install();
     pretty_env_logger::init();
 
-    let mut config = Config::new(&args.config)?;
+    let mut config = Config::new(args.config.iter())?;
 
     if args.alias {
         let aliases = config.aliases.get_aliases();
