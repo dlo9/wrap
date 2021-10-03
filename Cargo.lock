@@ -194,7 +194,7 @@ dependencies = [
 [[package]]
 name = "config"
 version = "0.11.0"
-source = "git+https://github.com/dlo9/config-rs#44d8ce79ff3900acf69040e63f3c299a576dc106"
+source = "git+https://github.com/mehcode/config-rs#052c9503c65ee66074d00e8885aa13e6831bf079"
 dependencies = [
  "async-trait",
  "indexmap",
@@ -1011,7 +1011,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "wrap"
-version = "0.2.3"
+version = "0.2.4"
 dependencies = [
  "anyhow",
  "color-backtrace",

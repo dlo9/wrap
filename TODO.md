@@ -21,6 +21,3 @@
 - Tests
 - Test & example for YAML anchors
 - Don't print unnecessary quotes with --dry-run
-
-Bugs:
-- overriding HOME at runtime doesn't work? -> downstream bug in `config-rs`, need to update version
