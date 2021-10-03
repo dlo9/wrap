@@ -16,7 +16,6 @@
   and can easily have something passed to it.
   Right now this doesn't play nicely with overrides
   Could possibly merge `keywords` and `overrides` fields with this?
-- Allow empty/missing `cleared-by`
 - Rename `arguments` -> `defaults` and `keywords` -> `overrides`
 - Tests
 - Test & example for YAML anchors

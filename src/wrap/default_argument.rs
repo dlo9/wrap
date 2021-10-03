@@ -1,11 +1,13 @@
 use std::collections::HashSet;
 use serde_derive::Deserialize;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
 struct DefaultArgument {
     pub key: String,
     pub value: Option<String>,
+
+    #[serde(default)]
     pub cleared_by: HashSet<String>,
 }
 
@@ -34,5 +36,24 @@ impl DefaultArguments {
         for default_argument in self.0.into_iter() {
             default_argument.apply(arguments);
         }
+    }
+}
+
+
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn deserialize__only_key_present__okay() {
+        assert_eq!(
+            DefaultArgument {
+                key: "mykey".to_string(),
+                value: None,
+                cleared_by: HashSet::default(),
+            },
+            serde_yaml::from_str("{ key: mykey }").unwrap()
+        );
     }
 }
