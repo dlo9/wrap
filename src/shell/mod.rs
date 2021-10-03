@@ -1,28 +1,40 @@
 mod fish;
 
-use std::env;
+use std::{env, str::FromStr};
 
-use anyhow::{Context, Result};
+use anyhow::{
+    bail,
+    Context,
+    Result
+};
 use Shell::*;
 
-custom_derive! {
-    #[derive(Debug, EnumFromStr)]
-    pub enum Shell {
-        // TODO: use correct case here
-        fish,
+#[derive(Debug)]
+pub enum Shell {
+    Fish,
+}
+
+impl FromStr for Shell {
+    type Err = anyhow::Error;
+
+    fn from_str(s: &str) -> Result<Self> {
+        match s {
+            "fish" => Ok(Fish),
+            _ => bail!("Shell is not yet supported: {}", s)
+        }
     }
 }
 
 impl Shell {
     fn alias(&self, aliases: &[String]) -> Result<()> {
         match self {
-            fish => fish::alias(aliases),
+            Fish => fish::alias(aliases),
         }
     }
 
     fn unalias(&self, aliases: &[String]) -> Result<()> {
         match self {
-            fish => fish::unalias(aliases),
+            Fish => fish::unalias(aliases),
         }
     }
 }
@@ -44,5 +56,4 @@ fn get_shell() -> Result<Shell> {
         .with_context(|| format!("Failed to get shell from SHELL path: {}", shell_path))?;
 
     str::parse::<Shell>(shell)
-        .with_context(|| format!("Shell is not yet supported: {}", shell))
 }
