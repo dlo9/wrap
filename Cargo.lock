@@ -867,6 +867,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "shell-escape"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "45bb67a18fa91266cc7807181f62f9178a6873bfad7dc788c42e6430db40184f"
+
+[[package]]
 name = "static_assertions"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1029,7 +1035,7 @@ checksum = "712e227841d057c1ee1cd2fb22fa7e5a5461ae8e48fa2ca79ec42cfc1931183f"
 
 [[package]]
 name = "wrap"
-version = "0.2.4"
+version = "0.2.5"
 dependencies = [
  "anyhow",
  "color-backtrace",
@@ -1047,6 +1053,7 @@ dependencies = [
  "serde 1.0.126",
  "serde_derive",
  "serde_yaml",
+ "shell-escape",
  "structopt",
 ]
 
