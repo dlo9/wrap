@@ -1,6 +1,6 @@
 [package]
 name = "wrap"
-version = "0.2.4"
+version = "0.2.5"
 authors = ["David Orchard <if_coding@fastmail.com>"]
 edition = "2018"
 
@@ -30,6 +30,7 @@ exec = "0.3.1"
 pest = "2.0"
 pest_derive = "2.0"
 indexmap = { version = "1.7.0", features = ["serde-1"] }
+shell-escape = "0.1.5"
 
 [dev-dependencies]
 serde_yaml = "0.8.21"

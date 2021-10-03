@@ -19,4 +19,3 @@
 - Rename `arguments` -> `defaults` and `keywords` -> `overrides`
 - Tests
 - Test & example for YAML anchors
-- Don't print unnecessary quotes with --dry-run

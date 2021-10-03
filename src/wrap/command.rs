@@ -1,3 +1,4 @@
+use shell_escape::escape;
 use std::fmt::{
     Display,
     Formatter,
@@ -21,15 +22,62 @@ impl Into<exec::Command> for Command {
 
 impl Display for Command {
     fn fmt(&self, f: &mut Formatter<'_>) -> Result {
-        write!(f, "{}", self.program)?;
+        write!(f, "{}", escape((&self.program).into()))?;
 
-        // TODO: only quote if `argument` has spaces
-        // TODO: escape quotes in `argument`
-        // Or, just print as an array...
         for argument in self.arguments.iter() {
-            write!(f, " \"{}\"", argument)?
+            write!(f, " {}", escape(argument.into()))?
         }
 
         Ok(())
+    }
+}
+
+#[cfg(test)]
+#[allow(non_snake_case)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn display__no_special_characters__not_escaped() {
+        assert_eq!(
+            format!("{}", Command {
+                program: "echo".to_string(),
+                arguments: vec!("argument1".to_string()),
+            }),
+            "echo argument1",
+        );
+    }
+
+    #[test]
+    fn display__space_in_string__escaped() {
+        assert_eq!(
+            format!("{}", Command {
+                program: "echo".to_string(),
+                arguments: vec!(r#"argument: "#.to_string()),
+            }),
+            r#"echo 'argument: '"#,
+        );
+    }
+
+    #[test]
+    fn display__double_quote_in_string__escaped() {
+        assert_eq!(
+            format!("{}", Command {
+                program: "echo".to_string(),
+                arguments: vec!(r#"argument:""#.to_string()),
+            }),
+            r#"echo 'argument:"'"#,
+        );
+    }
+
+    #[test]
+    fn display__single_quote_in_string__escaped() {
+        assert_eq!(
+            format!("{}", Command {
+                program: "echo".to_string(),
+                arguments: vec!(r#"argument:'"#.to_string()),
+            }),
+            r#"echo 'argument:'\'''"#,
+        );
     }
 }
