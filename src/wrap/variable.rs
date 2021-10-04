@@ -13,26 +13,16 @@ impl ArgumentParser {
     // TODO: return Cow
     pub fn expand(argument: &str, variables: &HashMap<String, String>) -> Result<String> {
         // Parse the argument
-        let parsed = ArgumentParser::parse(Rule::argument, argument)
-            .with_context(|| "Argument parsing failed")?
-            .next()
-            .expect("Argument parsing will always produce a token")
-            .into_inner();
+        let pairs = ArgumentParser::parse(Rule::argument, argument)
+            .with_context(|| "Argument parsing failed")?;
 
         // Expand the argument's variables
         let mut argument = String::new();
-        for pair in parsed {
+        for pair in pairs.flatten() {
             match pair.as_rule() {
                 Rule::literal => argument.push_str(pair.as_str()),
                 Rule::tilde => argument.push_str(Self::get_var("HOME", variables)),
-                Rule::variable => {
-                    for pair in pair.into_inner() {
-                        match pair.as_rule() {
-                            Rule::variable_ident => argument.push_str(Self::get_var(pair.as_str(), variables)),
-                            _ => {},
-                        }
-                    }
-                }
+                Rule::variable_ident => argument.push_str(Self::get_var(pair.as_str(), variables)),
                 _ => {},
             };
         }
