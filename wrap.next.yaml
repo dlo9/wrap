@@ -1,0 +1,190 @@
+# Invoking `wrap install` will automatically install these aliases in your shell.
+# To uninstall, run `wrap uninstall`. Both may require restarting your shell to take effect.
+#
+# Supported shells:
+#   - fish
+#
+# All aliases have a `--dry-run` flag which, when invoked, will print the command instead of running it
+#
+
+# TODO: rewrite
+# Variables will be expanded when used as an argument value
+# Invoking an argument can be done with POSIX shell syntax:
+#   - Typical use: $MY_VARIABLE
+#   - Variable with text immediately following: ${MY_VARIABLE}_with_some_text
+#   - Tilde expansion: ~/file_in_my_home_directory.txt
+#
+# Variables in arguments can be from here, the environment, or positional arguments. Environment
+# variables take precedence over config variables. If a variable does not exist, it will expand
+# into the empty string.
+variables:
+
+  # Any number of variables can be defined
+  # Like POSIX shell, variables must match `[a-zA-Z][a-zA-Z0-9_]+`
+  DEV_DOMAIN: dev.domain.com
+  KAFKA_1: kafka-broker-1
+  KAFKA_2: kafka-broker-2
+
+  # Variables may contain previously defined variables
+  # Like POSIX shell variables can expand with `$NAME` or `${NAME}`
+  KAFKA_DEV: ${KAFKA_1}.${DEV_DOMAIN},$KAFKA_2.$DEV_DOMAIN
+
+  # They may also contain environment variables
+  KAFKA_LOCAL: $HOSTNAME:9092
+
+  # Or tilde
+  CONFIG_DIR: ~/.config
+
+# YAML anchors for reusing values
+#
+# All features of YAML anchors/aliases, including merge keys, are supported. This map
+# will be ignored for any non-yaml configs.
+#
+# For more information, see: https://yaml.org/type/merge.html
+anchors:
+  - my-anchor: &kafka-common-flags:
+    - --bootstrap-brokers
+    - $KAFKA_DEV
+  - my-alias: *kafka-common-flags
+
+commands:
+  # The alias's name
+  #
+  # An alias will be invoked when executing `wrap <alias-name>`, and can be installed as an alias
+  # in the current shell.
+  #
+  # To avoid issues when aliasing, a command's name must match `[a-zA-Z0-9_+-]`:
+  # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_10
+  - name: ""
+
+    # A description for the command (optional)
+    #
+    # This description will automatically be printed when `wrap --list` is executed.
+    #
+    #description: ""
+
+    # The format to use for alias and program flags (optional)
+    #
+    # This config sets the number of hypens to prepend to flag names. If a flag already starts
+    # with a hyphen, this value is ignored and the flag format for that flag becomes `raw`.
+    #
+    # Values:
+    #   - double: double-hyphen for long flags, single for short
+    #   - single: single-hyphen for both long and short flags
+    #   - raw: no hyphens are added
+    #   - inherit: inherit from the parent config (for the root config, this uses the default value of `double`)
+    #
+    #flag-format: double
+
+    # The program to execute
+    program:
+
+      # Name or path of the program to execute
+      #
+      # If this is a path, the program at that path will be executed. Otherwise, the program name is searched for in PATH directories.
+      name: ""
+
+      # The format to use for program flags (optional)
+      #flag-format: inherit
+
+      # Arguments that the program may accepts.
+      #
+      # The program may accept more arguments than defined here, but if an argument
+      # should be set by default or can be overridden by an alias argument then
+      # it must be defined here.
+      #
+      # Arguments will be passed in the order defined.
+      arguments:
+
+        - # The flag's key/name
+          #
+          # If an argument starts with `-`, then the `raw` flag-format is used. Otherwise,
+          # hyphens are prepended to the key depending on the key length and flag-format defined.
+          key: ""
+
+          # Whether this flag's format is `raw` (optional)
+          #
+          # This is automatically set to `true` if the flag begins with `-`.
+          # Flags are expected to be consistent for a single program, so this is only useful
+          # if the program accepts non-hyphened subcommands in addition to flags.
+          #
+          #raw: false
+
+          # Default values to pass with the key (optional)
+          #
+          # Values are passed as separate arguments immediately following the key. This does not
+          # need to be defined even if the program's flag requires a value, as long as an alias
+          # argument provides the value.
+          #
+          # This may contain variables or positional arguments.
+          #
+          #values: [""]
+
+          # Flags which override this one when specified later in the command (optional)
+          #
+          # If a flag defined here exists later in the command, then this argument (key and values)
+          # will be overridden by the new argument. This allows a user to specify a short name when this
+          # argument uses the long name and not have multiple of the same argument appear in the final
+          # command.
+          #
+          # The flag's name is automatically defined as an override and is appended to this array.
+          #
+          #overrides: [""]
+
+          # TODO: Probably remove, not necessary if `overrides` doesn't automatically contain the key name (expect for e.g. verbosity -vvv?)
+          # Whether to allow multiple of the same flag
+          #
+          # If this is specified, then:
+          #   - this flag will not be passed when there are no default values
+          #   -`overrides` is ignored
+          #
+          #multiple: false
+
+    # Arguments for the alias
+    #
+    # These are arguments supported by the alias, which can be thought of as "shortcuts".
+    # They can be used to pass multiple or longer flags to the underlaying program.
+    arguments:
+
+      - # The flag's key/name
+        #
+        # If an argument starts with `-`, then the `raw` flag-format is used. Otherwise,
+        # hyphens are prepended to the key depending on the key length and flag-format defined.
+        name: create
+
+        # A description for the flag (optional)
+        #
+        # This description will automatically be printed when `wrap --list` is executed.
+        #
+        #description: ""
+
+        # Positional arguments for the
+        positionals:
+          - name: topic
+            description: The topic to create
+        #overrides: [--topic, $topic, -n]
+        #overrides: [--topic, $1, -n]
+        # overrides:
+        #   - --topic: $1
+        #   - -n
+        # overrides:
+        #   "--topic": $1
+        #   "-n"
+        overrides:
+          - key: topic
+            value: $1
+          - key: dry-run
+      - name: delete
+        description:
+        overrides: [--topic, $1]
+
+#TODO:
+# - [ ] decide on `command` vs `alias`
+# - [ ] decide on `arguments` vs `flags`
+# - [ ] decide on `key` vs `name`
+
+
+arguments:
+  - keys: [namespace, n]
+    conflicts-with: A
+    template: [-n, $1]
