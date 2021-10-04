@@ -11,29 +11,28 @@ pub struct ArgumentParser;
 
 impl ArgumentParser {
     // TODO: return Cow
-    pub fn expand(argument: &str, variables: &HashMap<String, String>, positionals: &mut Vec<&str>) -> Result<String> {
+    pub fn expand(argument: &str, variables: &HashMap<String, String>, positionals: &[String]) -> Result<(String, usize)> {
         // Parse the argument
         let pairs = ArgumentParser::parse(Rule::argument, argument)
             .with_context(|| "Argument parsing failed")?;
 
         // Expand the argument's variables
         let mut argument = String::new();
+        let mut positionals_used = 0;
         for pair in pairs.flatten() {
             match pair.as_rule() {
                 Rule::literal => argument.push_str(pair.as_str()),
                 Rule::tilde => argument.push_str(Self::get_var("HOME", variables)),
                 Rule::variable_identifier => argument.push_str(Self::get_var(pair.as_str(), variables)),
-                Rule::positional_identifier => argument.push_str(Self::get_positional(pair.as_str(), positionals)?),
-                Rule::positionals_identifier => {
-                    for positional in positionals {
-                        argument.push_str(positional)
-                    }
+                Rule::positional_identifier => {
+                    positionals_used += 1;
+                    argument.push_str(Self::get_positional(positionals_used - 1, positionals)?)
                 }
                 _ => {},
             };
         }
 
-        Ok(argument)
+        Ok((argument, positionals_used))
     }
 
     fn get_var<'a>(name: &str, variables: &'a HashMap<String, String>) -> &'a str {
@@ -43,15 +42,10 @@ impl ArgumentParser {
             .unwrap_or_default()
     }
 
-    fn get_positional<'a>(index: &str, positionals: &'a mut Vec<&str>) -> Result<&'a str> {
-        let index = index.parse::<usize>()
-            .with_context(|| format!("Positional identifier is not a number: {}", index))?;
-
+    fn get_positional<'a>(index: usize, positionals: &'a [String]) -> Result<&'a String> {
         positionals
-            .get(index - 1)
-            .map(|index| *index)
-            //.map(|s| s.as_str())
-            .ok_or(anyhow!("Missing positional #{}", index))
+            .get(index)
+            .ok_or(anyhow!("Missing positional #{}", index + 1))
     }
 }
 
@@ -82,8 +76,22 @@ impl Variables {
     pub fn apply(&self, arguments: &Vec<String>) -> Result<Vec<String>> {
         let mut output = Vec::with_capacity(arguments.len());
 
-        for argument in arguments {
-            output.push(ArgumentParser::expand(&argument, &self.0, &vec![])?);
+        let mut arguments_to_skip = 0;
+        for (index, argument) in arguments.iter().enumerate() {
+            if arguments_to_skip > 0 {
+                arguments_to_skip -= 1;
+                continue;
+            }
+
+            let positionals = if arguments.len() > index {
+                &arguments[index+1..]
+            } else {
+                &arguments[0..0]
+            };
+
+            let results = ArgumentParser::expand(&argument, &self.0, positionals)?;
+            output.push(results.0);
+            arguments_to_skip = results.1;
         }
 
         Ok(output)
@@ -127,49 +135,34 @@ mod test {
 
     #[test]
     fn expand__one_positional_input__replaced_output_one_skipped() {
-        let input = "The first positional is: $1";
+        let input = "The first positional is: $#";
         let expected = ("The first positional is: first".to_string(), 1);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first"]).unwrap();
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn expand__duplicate_positional_input__replaced_output_one_skipped() {
-        let input = "The first positional is: $1, $1";
-        let expected = ("The first positional is: first, first".to_string(), 1);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first"]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &vec!["first".to_string()]).unwrap();
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn expand__two_positional_inputs__replaced_output_one_skipped() {
-        let input = "The first positional is: $1, $2";
+        let input = "The first positional is: $#, ${#}";
         let expected = ("The first positional is: first, second".to_string(), 2);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first", "second"]).unwrap();
-        assert_eq!(expected, actual);
-    }
-
-    #[test]
-    fn expand__positionals_input__replaced_output_all_skipped() {
-        let input = "The positionals are: $@";
-        let expected = ("The positionals are: firstsecond".to_string(), 2);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first", "second"]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &vec!["first".to_string(), "second".to_string()]).unwrap();
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn expand__missing_positional__error() {
-        let input = "The first positional is: $1";
+        let input = "The first positional is: $#";
         let expected = "Missing positional #1";
         let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
         assert_eq!(expected, actual);
     }
 
     #[test]
-    fn expand__missing_positionals__empty_replacement() {
-        let input = "The positionals are: $@";
-        let expected = ("The positionals are: ".to_string(), 0);
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+    fn apply__one_positional__one_skipped() {
+        let input = vec!["first: 1".to_string(), "second: $#".to_string(), "2".to_string(), "third: 3".to_string()];
+        let expected = vec!["first: 1", "second: 2", "third: 3"];
+        let actual = Variables(HashMap::new()).apply(&input).unwrap();
+        // let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
         assert_eq!(expected, actual);
     }
 }
