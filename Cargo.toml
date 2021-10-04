@@ -10,7 +10,8 @@ paw = "1"
 structopt = { version = "0.3", features = ["paw"] }
 
 # Config
-config = { git = "https://github.com/mehcode/config-rs", commit = "052c9503c65ee66074d00e8885aa13e6831bf079", features = ["toml", "json", "yaml", "hjson", "ini", "ron", "json5", "preserve_order"] }
+# TODO: use a version again once it's published
+config = { git = "https://github.com/mehcode/config-rs", rev = "052c9503c65ee66074d00e8885aa13e6831bf079", features = ["toml", "json", "yaml", "hjson", "ini", "ron", "json5", "preserve_order"] }
 dirs = "4.0.0"
 serde_derive = "1.0.126"
 serde = "1.0.126"
