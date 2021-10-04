@@ -10,16 +10,11 @@ literal = { escaped | not_escaped }
 // Variables: $HOME or ${USER}
 variable_identifier = { (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" )* }
 
-// Postitional arguments: $1, ${2}, but not $0
-positional_identifier = { ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
-
-// All positionals: $@
-positionals_identifier = { "@" }
+positional_identifier = { "#" }
 
 expansion_name = {
                     (variable_identifier | ("{" ~ variable_identifier ~ "}")) |
-                    (positional_identifier | ("{" ~ positional_identifier ~ "}")) |
-                    (positionals_identifier | ("{" ~ positionals_identifier ~ "}"))
+                    (positional_identifier | ("{" ~ positional_identifier ~ "}"))
                  }
 
 expansion = { tilde | (expansion_indicator ~ (expansion_name | ("{" ~ expansion_name ~ "}"))) }
