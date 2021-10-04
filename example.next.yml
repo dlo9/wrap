@@ -1,0 +1,133 @@
+# Invoking `wrap install` will automatically install these aliases in your shell.
+# To uninstall, run `wrap uninstall`. Both may require restarting your shell to take effect.
+#
+# Supported shells:
+#   - fish
+#
+# All aliases have a `--dry-run` flag which, when invoked, will print the command instead of running it
+#
+
+# Variables will be expanded when used as an argument value
+# Invoking an argument can be done with POSIX shell syntax:
+#   - Typical use: $MY_VARIABLE
+#   - Variable with text immediately following: ${MY_VARIABLE}_with_some_text
+#   - Tilde expansion: ~/file_in_my_home_directory.txt
+#
+# Variables in arguments can be from the environment or defined here. Environment
+# variables take precedence. If a variable does not exist, it will expand into the
+# empty string.
+variables:
+
+  # Any number of variables can be defined
+  # Like POSIX shell, variables must match `[a-zA-Z][a-zA-Z0-9_]+`
+  DEV_DOMAIN: dev.domain.com
+  KAFKA_1: kafka-broker-1
+  KAFKA_2: kafka-broker-2
+
+  # Variables may contain previously defined variables
+  # Like POSIX shell variables can expand with `$NAME` or `${NAME}`
+  KAFKA_DEV: ${KAFKA_1}.${DEV_DOMAIN},$KAFKA_2.$DEV_DOMAIN
+
+  # They may also contain environment variables
+  KAFKA_LOCAL: $HOSTNAME:9092
+
+  # Or tilde
+  CONFIG_DIR: ~/.config
+
+# YAML anchors for reusing values
+#
+# All features of YAML anchors/aliases, including merge keys, are supported. This map
+# will be ignored for any non-yaml configs.
+#
+# For more information, see: https://yaml.org/type/merge.html
+anchors:
+  - my-anchor: &kafka-common-flags:
+    - --bootstrap-brokers
+    - $KAFKA_DEV
+  - my-alias: *kafka-common-flags
+
+commands:
+  # The alias's name
+  #
+  # An alias will be invoked when executing `wrap <alias-name>`, and can be installed as an alias
+  # in the current shell.
+  #
+  # To avoid issues when aliasing, a command's name must match `[a-zA-Z0-9_+-]`:
+  # https://pubs.opengroup.org/onlinepubs/9699919799/basedefs/V1_chap03.html#tag_03_10
+  - name: kafka-create
+
+    # A description for the command
+    #description:
+
+    # The format to use for alias and program flags (optional)
+    #
+    # This config sets the number of hypens to prepend to flag names. If a flag already starts
+    # with a hyphen, this value is ignored and the flag format for that flag becomes `raw`.
+    #
+    # Values:
+    #   - double: double-hyphen for long flags, single for short
+    #   - single: single-hyphen for both long and short flags
+    #   - raw: no hyphens are added
+    #   - inherit: inherit from the parent config (for the root config, this uses the default value of `double`)
+    #
+    #flag-format: double
+
+    # The program to execute
+    program:
+
+      # Name or path of the program to execute
+      #
+      # If this is a path, the program at that path will be executed. Otherwise, the program name is searched for in PATH directories.
+      name: kafka-topics
+
+      # The format to use for program flags (optional)
+      #flag-format: inherit
+
+      # Arguments that the program may accepts.
+      #
+      # The program may accept more arguments than defined here, but if an argument
+      # should be set by default or can be overridden by an alias argument then
+      # it must be defined here.
+      arguments:
+
+        - # The flag's key/name
+          #
+          # This flag would be passed to the program like: `--partitions 1`.
+          # If an argument starts with `-`, then the `raw` flag-format is used.
+          key: partitions
+
+          # Whether this flag's format is `raw` (optional)
+          #
+          # This is automatically set to `true` if the flag begins with `-`.
+          # Flags are expected to be consistent for a single program, so this is only useful
+          # if the program accepts non-hyphened subcommands in addition to flags.
+          #
+          # raw: false
+
+          # Values to
+          values: ["1"]
+          overrides: [p]  # `partitions` override automatically added
+        - key: topic
+          value: $1
+          multiple: true  # `topic` override not added
+    arguments:
+      # strict: no pass-through allowed
+      #mode: strict
+      flags:
+        - name:
+          description:
+      positionals:
+        - topic-name
+
+    #flag-format: raw/single/double (default: double)
+    arguments:
+      - key: partitions
+        #format: raw/auto (also auto-detect this if key starts with '-')
+        value: 1
+        overrides: [p, partitions]
+      - key: topic
+        value: $1
+        multiple: true
+    overrides:
+      - key: prod
+        values:
