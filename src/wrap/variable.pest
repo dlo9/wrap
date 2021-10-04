@@ -1,13 +1,27 @@
 escape = { "\\" }
 tilde = { "~" }
-variable_indicator = { "$" }
+expansion_indicator = { "$" }
 
-escapable = { (escape | tilde | variable_indicator) }
+escapable = { (escape | tilde | expansion_indicator) }
 escaped = { escape ~ escapable }
 not_escaped = { !escapable ~ ANY }
 literal = { escaped | not_escaped }
 
-variable_ident = { (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" )* }
-variable = { variable_indicator ~ (variable_ident | ("{" ~ variable_ident ~ "}")) }
+// Variables: $HOME or ${USER}
+variable_identifier = { (ASCII_ALPHA | "_") ~ (ASCII_ALPHANUMERIC | "_" )* }
 
-argument = { SOI ~ (literal | variable | tilde)* ~ EOI }
+// Postitional arguments: $1, ${2}, but not $0
+positional_identifier = { ASCII_NONZERO_DIGIT ~ ASCII_DIGIT* }
+
+// All positionals: $@
+positionals_identifier = { "@" }
+
+expansion_name = {
+                    (variable_identifier | ("{" ~ variable_identifier ~ "}")) |
+                    (positional_identifier | ("{" ~ positional_identifier ~ "}")) |
+                    (positionals_identifier | ("{" ~ positionals_identifier ~ "}"))
+                 }
+
+expansion = { tilde | (expansion_indicator ~ (expansion_name | ("{" ~ expansion_name ~ "}"))) }
+
+argument = { SOI ~ (literal | expansion)* ~ EOI }
