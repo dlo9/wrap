@@ -21,7 +21,7 @@ impl ArgumentParser {
         let mut positionals_used = 0;
         for pair in pairs.flatten() {
             match pair.as_rule() {
-                Rule::literal => argument.push_str(pair.as_str()),
+                Rule::escapable | Rule::not_escaped => argument.push_str(pair.as_str()),
                 Rule::tilde => argument.push_str(Self::get_var("HOME", variables)),
                 Rule::variable_identifier => argument.push_str(Self::get_var(pair.as_str(), variables)),
                 Rule::positional_identifier => {
@@ -122,6 +122,30 @@ mod test {
         let input = "nothing special here";
         let expected = (input.to_string(), 0);
         let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn expand__escaped_input__escape_removed() {
+        let input = r#"A bunch of escapes: \\ \$ \~"#;
+        let expected = (r#"A bunch of escapes: \ $ ~"#.to_string(), 0);
+        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn expand__invalid_escape_input__error() {
+        let input = r#"Invalid escape: \2"#;
+        let expected = "Argument parsing failed";
+        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
+        assert_eq!(expected, actual);
+    }
+
+    #[test]
+    fn expand__missing_escapable_input__error() {
+        let input = r#"Missing escape: \"#;
+        let expected = "Argument parsing failed";
+        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
         assert_eq!(expected, actual);
     }
 
