@@ -1,6 +1,6 @@
 use pest::Parser;
 use serde_derive::Deserialize;
-use std::{collections::HashMap, convert::TryFrom, env};
+use std::{collections::HashMap, convert::TryFrom, env, ops::{Deref, DerefMut}};
 use anyhow::{anyhow, Context, Result};
 use indexmap::IndexMap;
 use pest_derive::Parser;
@@ -49,26 +49,47 @@ impl ArgumentParser {
     }
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Deserialize)]
 #[serde(try_from = "IndexMap<String, String>")]
 pub struct Variables(HashMap<String, String>);
+
+impl Default for Variables {
+    fn default() -> Self {
+        Variables(env::vars().collect())
+    }
+}
+
+impl Deref for Variables {
+    type Target = HashMap<String, String>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Variables {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
 
 impl TryFrom<IndexMap<String, String>> for Variables {
     type Error = anyhow::Error;
 
     fn try_from(config_variables: IndexMap<String, String>) -> Result<Variables> {
         // Start with environment variables
-        let mut variables: HashMap<String, String> = env::vars().collect();
+        let mut variables = Variables::default();
 
         // Insert variables from the config if not overridden by the environment
         for (key, value) in config_variables {
             if !variables.contains_key(&key) {
                 // Expand variables as we insert them
-                variables.insert(key, ArgumentParser::expand(&value, &variables, &vec![])?.0);
+                let expanded = ArgumentParser::expand(&value, &variables, &vec![])?.0;
+                variables.insert(key, expanded);
             }
         }
 
-        Ok(Variables(variables))
+        Ok(variables)
     }
 }
 
