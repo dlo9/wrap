@@ -26,15 +26,15 @@ impl Config {
     pub fn new<'a>(path_overrides: impl IntoIterator<Item = &'a PathBuf>) -> Result<Self, ConfigError> {
         let mut config = config::Config::builder();
 
-        // User `path_overrides` if it's not empty
-        let mut use_defaults = true;
+        // Use `path_overrides` if it's not empty
+        let mut search_for_config = true;
         for path in path_overrides {
-            use_defaults = true;
+            search_for_config = false;
             config = config.add_source(File::with_name(&path.to_string_lossy()).required(true));
         }
 
         // Otherwise, use defult paths
-        if use_defaults {
+        if search_for_config {
             // Start off by merging in the global configuration file
             // TODO: linux only
             config = config.add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
