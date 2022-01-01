@@ -2,22 +2,22 @@ mod wrap;
 mod shell;
 
 use anyhow::{Context, Result, bail};
+use clap::{AppSettings, Parser};
 use std::path::PathBuf;
 use wrap::Config;
 
-#[derive(structopt::StructOpt)]
-#[structopt(
-    rename_all = "kebab",
-    rename_all_env = "screaming-snake",
-    setting = structopt::clap::AppSettings::ColoredHelp,
-    setting = structopt::clap::AppSettings::TrailingVarArg,
+#[derive(Parser)]
+#[clap(
+    about,
+    author,
+    //setting(AppSettings::TrailingVarArg),
+    version,
 )]
 struct Args {
     /// Install aliases for the current shell
     ///
-    /// Currently supported shells:
-    ///   - fish
-    #[structopt(long)]
+    /// Currently supported shells: [fish]
+    #[clap(long)]
     alias: bool,
 
     /// The config files to read from
@@ -25,15 +25,15 @@ struct Args {
     /// If specified, the default config files will not be used,
     /// and instead these config files will be merged with the first file
     /// having the least precedence
-    #[structopt(env, short, long)]
+    #[clap(short, long)]
     config: Vec<PathBuf>,
 
     /// Print the command to be run
-    #[structopt(short = "n", long, conflicts_with_all = &["alias", "unalias"])]
+    #[clap(short = 'n', long, conflicts_with_all = &["alias", "unalias"])]
     dry_run: bool,
 
     /// Uninstall aliases for the current shell
-    #[structopt(long, conflicts_with = "alias")]
+    #[clap(long, conflicts_with = "alias")]
     unalias: bool,
 
     /// Positional arguments to pass to the underlying command
@@ -42,10 +42,11 @@ struct Args {
 
 const DRY_RUN_GLOBAL: &str = "--dry-run";
 
-#[paw::main]
-fn main(mut args: Args) -> Result<()> {
+fn main() -> Result<()> {
     color_backtrace::install();
     pretty_env_logger::init();
+
+    let mut args = Args::parse();
 
     let mut config = Config::new(args.config.iter())?;
 
