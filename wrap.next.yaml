@@ -162,6 +162,12 @@ aliases:
           - name: topic
             description: The topic to create
 
+        # Flags which should be overridden when specified earlier in the command (optional)
+        #
+        # If a flag defined here exists earlier in the command, then this flag (name and values)
+        # will override the old flag. This allows a user to clear default flags in certain cases.
+        overrides: []
+
         # Program flags provided by this alias flag
         #
         # Unless overridden by a later alias flag, these will override program flags. They
