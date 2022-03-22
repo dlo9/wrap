@@ -1,8 +1,8 @@
 mod wrap;
 mod shell;
 
-use anyhow::{Context, Result, bail};
-use clap::{AppSettings, Parser};
+use anyhow::{Context, Result};
+use clap::{AppSettings, Subcommand, Parser};
 use std::path::PathBuf;
 use wrap::Config;
 
@@ -10,16 +10,12 @@ use wrap::Config;
 #[clap(
     about,
     author,
-    //setting(AppSettings::TrailingVarArg),
+    setting(AppSettings::InferSubcommands),
+    setting(AppSettings::SubcommandRequiredElseHelp),
+    setting(AppSettings::TrailingVarArg),
     version,
 )]
 struct Args {
-    /// Install aliases for the current shell
-    ///
-    /// Currently supported shells: [fish]
-    #[clap(long)]
-    alias: bool,
-
     /// The config files to read from
     ///
     /// If specified, the default config files will not be used,
@@ -28,16 +24,37 @@ struct Args {
     #[clap(short, long)]
     config: Vec<PathBuf>,
 
-    /// Print the command to be run
-    #[clap(short = 'n', long, conflicts_with_all = &["alias", "unalias"])]
-    dry_run: bool,
+    #[clap(subcommand)]
+    action: Action,
+}
+
+#[derive(Subcommand)]
+enum Action {
+    /// Install aliases for the current shell
+    ///
+    /// Currently supported shells: [fish]
+    Install,
 
     /// Uninstall aliases for the current shell
-    #[clap(long, conflicts_with = "alias")]
-    unalias: bool,
+    Uninstall,
 
-    /// Positional arguments to pass to the underlying command
-    args: Vec<String>,
+    /// Execute an alias
+    #[clap(
+        // So that trailing --help/--dry-run pass-through to the alias
+        setting(AppSettings::TrailingVarArg),
+    )]
+    Run {
+        /// Print the command instead of running it
+        #[clap(short = 'n', long)]
+        dry_run: bool,
+
+        /// Alias to run
+        alias: String,
+
+        /// Positional arguments to pass to the underlying command
+        #[clap(last = true, takes_value = true, allow_hyphen_values = true)]
+        args: Vec<String>,
+    },
 }
 
 const DRY_RUN_GLOBAL: &str = "--dry-run";
@@ -46,42 +63,40 @@ fn main() -> Result<()> {
     color_backtrace::install();
     pretty_env_logger::init();
 
-    let mut args = Args::parse();
+    let args = Args::parse();
 
     let mut config = Config::new(args.config.iter())?;
 
-    if args.alias {
-        let aliases = config.aliases.get_aliases();
-        shell::alias(&aliases)?;
-        println!("Shell aliases installed. You may need to restart your shell session to take effect");
-        return Ok(());
+    match args.action {
+        Action::Install => {
+            let aliases = config.aliases.get_aliases();
+            shell::alias(&aliases)?;
+            println!("Shell aliases installed. You may need to restart your shell session to take effect");
+        },
+
+        Action::Uninstall => {
+            let aliases = config.aliases.get_aliases();
+            shell::unalias(&aliases)?;
+            println!("Shell aliases uninstalled. You may need to restart your shell session to take effect");
+        },
+
+        Action::Run { dry_run, alias, mut args, } => {
+            // Determine if this is a dry run before we mutate the arguments
+            let dry_run = global_dry_run(&mut args) || dry_run;
+
+            let alias = config.aliases.get_alias(&alias).context("No matching alias found")?;
+            let command = alias.get_command(args, &mut config.variables)?;
+
+            if dry_run {
+                println!("{}", command);
+            } else {
+                let mut command: exec::Command = command.into();
+                return Err(command.exec().into());
+            }
+        },
     }
 
-    if args.unalias {
-        let aliases = config.aliases.get_aliases();
-        shell::unalias(&aliases)?;
-        println!("Shell aliases uninstalled. You may need to restart your shell session to take effect");
-        return Ok(());
-    }
-
-    if args.args.is_empty() {
-        bail!("No alias given");
-    }
-
-    // Determine if this is a dry run before we mutate the arguments
-    let dry_run = global_dry_run(&mut args.args) || args.dry_run;
-
-    let user_alias = args.args.remove(0);
-    let alias = config.aliases.get_alias(&user_alias).context("No matching alias found")?;
-    let command = alias.get_command(args.args, &mut config.variables)?;
-
-    if dry_run {
-        println!("{}", command);
-        Ok(())
-    } else {
-        let mut command: exec::Command = command.into();
-        Err(command.exec().into())
-    }
+    Ok(())
 }
 
 // Returns true if the global dry-run flag was found in the arguments,
