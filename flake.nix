@@ -57,6 +57,11 @@
             pkgs.cargo-deny
           ];
 
+          shellHook = ''
+            # Setup git hooks
+            ln -srf hooks/* .git/hooks/
+          '';
+
           RUST_BACKTRACE = 1;
         };
 

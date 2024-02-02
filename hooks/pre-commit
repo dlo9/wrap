@@ -1,0 +1,7 @@
+#!/bin/sh
+
+# Format Nix
+nix fmt -- -q .
+
+# Format Rust
+cargo fmt
