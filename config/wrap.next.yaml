@@ -176,10 +176,10 @@ aliases:
           - flag: topic
             values: [$topic]
           - flag: dry-run
-        
+
         # If user confirmation is required before running the command (optional)
         #
-        # If this is `true`, then the command to be run will be printed and the user 
+        # If this is `true`, then the command to be run will be printed and the user
         # will be asked 'Y/N' before the command will be run.
         confirm: false
 
