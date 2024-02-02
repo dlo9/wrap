@@ -26,9 +26,6 @@
 
             cargoLock = {
               lockFile = ./Cargo.lock;
-              outputHashes = {
-                "config-0.11.0" = "sha256-UDsMWPgmIS2mdfsKiYm1TBXW8lC4pUNCuoz17h5SEOI=";
-              };
             };
 
             meta = with pkgs.lib; {

@@ -1,15 +1,8 @@
-use config::{
-    ConfigError,
-    File,
-    Environment,
-};
+use config::{ConfigError, Environment, File};
 use serde_derive::Deserialize;
 use std::path::PathBuf;
 
-use super::{
-    alias::Aliases,
-    variable::Variables,
-};
+use super::{alias::Aliases, variable::Variables};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -23,7 +16,9 @@ pub struct Config {
 const CONFIG_FILE_NAME: &'static str = "wrap";
 
 impl Config {
-    pub fn new<'a>(path_overrides: impl IntoIterator<Item = &'a PathBuf>) -> Result<Self, ConfigError> {
+    pub fn new<'a>(
+        path_overrides: impl IntoIterator<Item = &'a PathBuf>,
+    ) -> Result<Self, ConfigError> {
         let mut config = config::Config::builder();
 
         // Use `path_overrides` if it's not empty
@@ -37,12 +32,20 @@ impl Config {
         if search_for_config {
             // Start off by merging in the global configuration file
             // TODO: linux only
-            config = config.add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
+            config = config
+                .add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
 
             // Add in the user's config
             // This doesn't use config_dir since it's a weird path on MacOS
             if let Some(path) = dirs::home_dir() {
-                config = config.add_source(File::with_name(&format!("{}/.config/{}", path.to_string_lossy(), CONFIG_FILE_NAME)).required(false));
+                config = config.add_source(
+                    File::with_name(&format!(
+                        "{}/.config/{}",
+                        path.to_string_lossy(),
+                        CONFIG_FILE_NAME
+                    ))
+                    .required(false),
+                );
             }
 
             // Add in the working dir's config
@@ -54,6 +57,6 @@ impl Config {
         config = config.add_source(Environment::with_prefix(CONFIG_FILE_NAME));
 
         // Deserialize the config
-        config.build()?.try_into()
+        config.build()?.try_deserialize()
     }
 }
