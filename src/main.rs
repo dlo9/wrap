@@ -2,7 +2,7 @@ mod wrap;
 mod shell;
 
 use anyhow::{Context, Result, bail};
-use clap::{AppSettings, Parser};
+use clap::Parser;
 use std::path::PathBuf;
 use wrap::Config;
 
@@ -10,7 +10,6 @@ use wrap::Config;
 #[clap(
     about,
     author,
-    //setting(AppSettings::TrailingVarArg),
     version,
 )]
 struct Args {

@@ -6,29 +6,34 @@ edition = "2018"
 
 [dependencies]
 # Command line arguments
-clap = { version = "3.0.0", features = ["color", "derive", "suggestions", "wrap_help"] }
+clap = { version = "4.0.0", features = [
+    "color",
+    "derive",
+    "suggestions",
+    "wrap_help",
+] }
 
 # Config
 # TODO: use a version again once it's published
-config = { git = "https://github.com/mehcode/config-rs", rev = "052c9503c65ee66074d00e8885aa13e6831bf079", features = ["toml", "json", "yaml", "hjson", "ini", "ron", "json5", "preserve_order"] }
-dirs = "4.0.0"
-serde_derive = "1.0.126"
-serde = "1.0.126"
+config = "0.14.0"
+dirs = "5"
+serde_derive = "1.0"
+serde = "1.0"
 
 # Logging/debugging
-color-backtrace = "0.5"
+color-backtrace = "0.6"
 log = "0.4"
-pretty_env_logger = "0.4"
+pretty_env_logger = "0.5"
 
 # Error handling
 anyhow = "1"
 
 # Logic
-exec = "0.3.1"
-pest = "2.0"
-pest_derive = "2.0"
-indexmap = { version = "1.7.0", features = ["serde-1"] }
-shell-escape = "0.1.5"
+exec = "0.3"
+pest = "2"
+pest_derive = "2"
+indexmap = { version = "2", features = ["serde"] }
+shell-escape = "0.1"
 
 [dev-dependencies]
-serde_yaml = "0.8.21"
+serde_yaml = "0.9"
