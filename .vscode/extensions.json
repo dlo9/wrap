@@ -1,0 +1,8 @@
+{
+    "recommendations": [
+        "rust-lang.rust-analyzer",
+        "serayuzgur.crates",
+        "jnoortheen.nix-ide",
+        "kamadorueda.alejandra"
+    ]
+}
