@@ -2,11 +2,7 @@ mod fish;
 
 use std::{env, str::FromStr};
 
-use anyhow::{
-    bail,
-    Context,
-    Result
-};
+use anyhow::{bail, Context, Result};
 use Shell::*;
 
 #[derive(Debug)]
@@ -20,7 +16,7 @@ impl FromStr for Shell {
     fn from_str(s: &str) -> Result<Self> {
         match s {
             "fish" => Ok(Fish),
-            _ => bail!("Shell is not yet supported: {}", s)
+            _ => bail!("Shell is not yet supported: {}", s),
         }
     }
 }
@@ -48,8 +44,8 @@ pub fn unalias(aliases: &[String]) -> Result<()> {
 }
 
 fn get_shell() -> Result<Shell> {
-    let shell_path = env::var("SHELL")
-        .context("Could not determine current shell. Is SHELL set?")?;
+    let shell_path =
+        env::var("SHELL").context("Could not determine current shell. Is SHELL set?")?;
 
     let (_, shell) = shell_path
         .rsplit_once("/")

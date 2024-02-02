@@ -1,9 +1,6 @@
-use dirs::home_dir;
 use anyhow::{Context, Result};
-use std::fs::{
-    write,
-    remove_file,
-};
+use dirs::home_dir;
+use std::fs::{remove_file, write};
 use std::path::PathBuf;
 
 pub fn alias(aliases: &[String]) -> Result<()> {
@@ -13,14 +10,22 @@ pub fn alias(aliases: &[String]) -> Result<()> {
     }
 
     let path = get_config_file_path()?;
-    write(&path, contents)
-        .with_context(|| format!("Encountered error while removing file {}", path.to_string_lossy()))
+    write(&path, contents).with_context(|| {
+        format!(
+            "Encountered error while removing file {}",
+            path.to_string_lossy()
+        )
+    })
 }
 
 pub fn unalias(_aliases: &[String]) -> Result<()> {
     let path = get_config_file_path()?;
-    remove_file(&path)
-        .with_context(|| format!("Encountered error while removing file {}", path.to_string_lossy()))
+    remove_file(&path).with_context(|| {
+        format!(
+            "Encountered error while removing file {}",
+            path.to_string_lossy()
+        )
+    })
 }
 
 fn get_config_file_path() -> Result<PathBuf> {

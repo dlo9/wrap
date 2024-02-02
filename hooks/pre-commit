@@ -1,7 +1,13 @@
 #!/bin/sh
 
+set -e
+
 # Format Nix
-nix fmt -- -q .
+git diff --name-only --staged -z **.nix | xargs -r -0 nix fmt -- -q
 
 # Format Rust
-cargo fmt
+git diff --name-only --staged -z **.rs | xargs -r -0 rustfmt
+
+# Add any changes to the files
+# TODO: Probably bad, can't stage patches this way
+git diff --name-only --staged -z | xargs -r -0 git add

@@ -1,17 +1,13 @@
-mod wrap;
 mod shell;
+mod wrap;
 
-use anyhow::{Context, Result, bail};
+use anyhow::{bail, Context, Result};
 use clap::Parser;
 use std::path::PathBuf;
 use wrap::Config;
 
 #[derive(Parser)]
-#[clap(
-    about,
-    author,
-    version,
-)]
+#[clap(about, author, version)]
 struct Args {
     /// Install aliases for the current shell
     ///
@@ -52,14 +48,18 @@ fn main() -> Result<()> {
     if args.alias {
         let aliases = config.aliases.get_aliases();
         shell::alias(&aliases)?;
-        println!("Shell aliases installed. You may need to restart your shell session to take effect");
+        println!(
+            "Shell aliases installed. You may need to restart your shell session to take effect"
+        );
         return Ok(());
     }
 
     if args.unalias {
         let aliases = config.aliases.get_aliases();
         shell::unalias(&aliases)?;
-        println!("Shell aliases uninstalled. You may need to restart your shell session to take effect");
+        println!(
+            "Shell aliases uninstalled. You may need to restart your shell session to take effect"
+        );
         return Ok(());
     }
 
@@ -71,7 +71,10 @@ fn main() -> Result<()> {
     let dry_run = global_dry_run(&mut args.args) || args.dry_run;
 
     let user_alias = args.args.remove(0);
-    let alias = config.aliases.get_alias(&user_alias).context("No matching alias found")?;
+    let alias = config
+        .aliases
+        .get_alias(&user_alias)
+        .context("No matching alias found")?;
     let command = alias.get_command(args.args, &mut config.variables)?;
 
     if dry_run {
@@ -86,7 +89,10 @@ fn main() -> Result<()> {
 // Returns true if the global dry-run flag was found in the arguments,
 // and then removes the flag so that it's no printed in the dry-run
 fn global_dry_run(arguments: &mut Vec<String>) -> bool {
-    if let Some(index) = arguments.iter().position(|argument| argument == DRY_RUN_GLOBAL) {
+    if let Some(index) = arguments
+        .iter()
+        .position(|argument| argument == DRY_RUN_GLOBAL)
+    {
         arguments.remove(index);
         true
     } else {
