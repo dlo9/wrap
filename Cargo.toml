@@ -3,6 +3,7 @@ name = "wrap"
 version = "0.3.9"
 authors = ["David Orchard <if_coding@fastmail.com>"]
 edition = "2018"
+license = "MIT"
 
 [dependencies]
 # Command line arguments

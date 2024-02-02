@@ -23,6 +23,7 @@
             version = "0.3.9";
 
             src = ./.;
+            release = true;
 
             cargoLock = {
               lockFile = ./Cargo.lock;
@@ -48,14 +49,15 @@
 
         # Enter with `nix develop`
         devShells.default = pkgs.mkShell {
-          nativeBuildInputs = [
+          buildInputs = [
             pkgs.cargo
+            pkgs.cargo-deny
           ];
-
-          shellHook = "code .";
 
           RUST_BACKTRACE = 1;
         };
+
+        formatter = nixpkgs.legacyPackages.${system}.alejandra;
       }
     );
 }
