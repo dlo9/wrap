@@ -1,9 +1,5 @@
 use shell_escape::escape;
-use std::fmt::{
-    Display,
-    Formatter,
-    Result,
-};
+use std::fmt::{Display, Formatter, Result};
 
 #[derive(Debug)]
 pub struct Command {
@@ -40,10 +36,13 @@ mod test {
     #[test]
     fn display__no_special_characters__not_escaped() {
         assert_eq!(
-            format!("{}", Command {
-                program: "echo".to_string(),
-                arguments: vec!("argument1".to_string()),
-            }),
+            format!(
+                "{}",
+                Command {
+                    program: "echo".to_string(),
+                    arguments: vec!("argument1".to_string()),
+                }
+            ),
             "echo argument1",
         );
     }
@@ -51,10 +50,13 @@ mod test {
     #[test]
     fn display__space_in_string__escaped() {
         assert_eq!(
-            format!("{}", Command {
-                program: "echo".to_string(),
-                arguments: vec!(r#"argument: "#.to_string()),
-            }),
+            format!(
+                "{}",
+                Command {
+                    program: "echo".to_string(),
+                    arguments: vec!(r#"argument: "#.to_string()),
+                }
+            ),
             r#"echo 'argument: '"#,
         );
     }
@@ -62,10 +64,13 @@ mod test {
     #[test]
     fn display__double_quote_in_string__escaped() {
         assert_eq!(
-            format!("{}", Command {
-                program: "echo".to_string(),
-                arguments: vec!(r#"argument:""#.to_string()),
-            }),
+            format!(
+                "{}",
+                Command {
+                    program: "echo".to_string(),
+                    arguments: vec!(r#"argument:""#.to_string()),
+                }
+            ),
             r#"echo 'argument:"'"#,
         );
     }
@@ -73,10 +78,13 @@ mod test {
     #[test]
     fn display__single_quote_in_string__escaped() {
         assert_eq!(
-            format!("{}", Command {
-                program: "echo".to_string(),
-                arguments: vec!(r#"argument:'"#.to_string()),
-            }),
+            format!(
+                "{}",
+                Command {
+                    program: "echo".to_string(),
+                    arguments: vec!(r#"argument:'"#.to_string()),
+                }
+            ),
             r#"echo 'argument:'\'''"#,
         );
     }

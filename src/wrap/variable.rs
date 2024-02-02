@@ -1,9 +1,14 @@
-use pest::Parser;
-use serde_derive::Deserialize;
-use std::{collections::HashMap, convert::TryFrom, env, ops::{Deref, DerefMut}};
 use anyhow::{anyhow, Context, Result};
 use indexmap::IndexMap;
+use pest::Parser;
 use pest_derive::Parser;
+use serde_derive::Deserialize;
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    env,
+    ops::{Deref, DerefMut},
+};
 
 #[derive(Parser)]
 #[grammar = "wrap/variable.pest"]
@@ -11,7 +16,11 @@ pub struct ArgumentParser;
 
 impl ArgumentParser {
     // TODO: return Cow
-    pub fn expand(argument: &str, variables: &HashMap<String, String>, positionals: &[String]) -> Result<(String, usize)> {
+    pub fn expand(
+        argument: &str,
+        variables: &HashMap<String, String>,
+        positionals: &[String],
+    ) -> Result<(String, usize)> {
         // Parse the argument
         let pairs = ArgumentParser::parse(Rule::argument, argument)
             .with_context(|| "Argument parsing failed")?;
@@ -23,12 +32,14 @@ impl ArgumentParser {
             match pair.as_rule() {
                 Rule::escapable | Rule::not_escaped => argument.push_str(pair.as_str()),
                 Rule::tilde => argument.push_str(Self::get_var("HOME", variables)),
-                Rule::variable_identifier => argument.push_str(Self::get_var(pair.as_str(), variables)),
+                Rule::variable_identifier => {
+                    argument.push_str(Self::get_var(pair.as_str(), variables))
+                }
                 Rule::positional_identifier => {
                     positionals_used += 1;
                     argument.push_str(Self::get_positional(positionals_used - 1, positionals)?)
                 }
-                _ => {},
+                _ => {}
             };
         }
 
@@ -36,10 +47,7 @@ impl ArgumentParser {
     }
 
     fn get_var<'a>(name: &str, variables: &'a HashMap<String, String>) -> &'a str {
-        variables
-            .get(name)
-            .map(|s| s.as_str())
-            .unwrap_or_default()
+        variables.get(name).map(|s| s.as_str()).unwrap_or_default()
     }
 
     fn get_positional<'a>(index: usize, positionals: &'a [String]) -> Result<&'a String> {
@@ -105,7 +113,7 @@ impl Variables {
             }
 
             let positionals = if arguments.len() > index {
-                &arguments[index+1..]
+                &arguments[index + 1..]
             } else {
                 &arguments[0..0]
             };
@@ -158,7 +166,9 @@ mod test {
     fn expand__invalid_escape_input__error() {
         let input = r#"Invalid escape: \2"#;
         let expected = "Argument parsing failed";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
+        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+            .unwrap_err()
+            .to_string();
         assert_eq!(expected, actual);
     }
 
@@ -166,7 +176,9 @@ mod test {
     fn expand__missing_escapable_input__error() {
         let input = r#"Missing escape: \"#;
         let expected = "Argument parsing failed";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
+        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+            .unwrap_err()
+            .to_string();
         assert_eq!(expected, actual);
     }
 
@@ -190,7 +202,12 @@ mod test {
     fn expand__two_positional_inputs__replaced_output_one_skipped() {
         let input = "The first positional is: $#, ${#}";
         let expected = ("The first positional is: first, second".to_string(), 2);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first".to_string(), "second".to_string()]).unwrap();
+        let actual = ArgumentParser::expand(
+            input,
+            &vars(),
+            &vec!["first".to_string(), "second".to_string()],
+        )
+        .unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -198,13 +215,20 @@ mod test {
     fn expand__missing_positional__error() {
         let input = "The first positional is: $#";
         let expected = "Missing positional #1";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();
+        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+            .unwrap_err()
+            .to_string();
         assert_eq!(expected, actual);
     }
 
     #[test]
     fn apply__one_positional__one_skipped() {
-        let input = vec!["first: 1".to_string(), "second: $#".to_string(), "2".to_string(), "third: 3".to_string()];
+        let input = vec![
+            "first: 1".to_string(),
+            "second: $#".to_string(),
+            "2".to_string(),
+            "third: 3".to_string(),
+        ];
         let expected = vec!["first: 1", "second: 2", "third: 3"];
         let actual = Variables(HashMap::new()).apply(&input).unwrap();
         // let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap_err().to_string();

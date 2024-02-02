@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use serde_derive::Deserialize;
+use std::collections::HashSet;
 
 #[derive(Debug, Deserialize)]
 struct Keyword {
@@ -12,7 +12,10 @@ impl Keyword {
     // This requires either a custom iterator impl with the GAT feature,
     // or the ability to return different impls from different if branches
     fn replace(self, to_replace: &mut Vec<String>) {
-        if let Some(key_index) = to_replace.iter().position(|possible_key| self.keys.contains(possible_key)) {
+        if let Some(key_index) = to_replace
+            .iter()
+            .position(|possible_key| self.keys.contains(possible_key))
+        {
             // Remove the found key
             to_replace.remove(key_index);
 

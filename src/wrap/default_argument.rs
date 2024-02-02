@@ -1,5 +1,5 @@
-use std::collections::HashSet;
 use serde_derive::Deserialize;
+use std::collections::HashSet;
 
 #[derive(Debug, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "kebab-case")]
@@ -16,7 +16,10 @@ impl DefaultArgument {
     // If a `cleared_by` argument exists in the list, no change will be made.
     // Otherwise, the default argument will be appended to the list.
     fn apply(self, arguments: &mut Vec<String>) {
-        if arguments.iter().all(|clearing_key| !self.cleared_by.contains(clearing_key)) {
+        if arguments
+            .iter()
+            .all(|clearing_key| !self.cleared_by.contains(clearing_key))
+        {
             // No clearing key found, add the key/value
             if let Some(value) = self.value {
                 arguments.insert(0, value);
@@ -38,7 +41,6 @@ impl DefaultArguments {
         }
     }
 }
-
 
 #[cfg(test)]
 #[allow(non_snake_case)]
