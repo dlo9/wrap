@@ -2,17 +2,17 @@
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-23.11";
     flake-utils.url = "github:numtide/flake-utils";
+    rust-overlay.url = "github:oxalica/rust-overlay";
   };
 
-  outputs = {
-    self,
-    nixpkgs,
-    flake-utils,
-    ...
-  } @ inputs:
-    flake-utils.lib.eachDefaultSystem (
+  outputs = {self, ...} @ inputs:
+    inputs.flake-utils.lib.eachDefaultSystem (
       system: let
-        pkgs = nixpkgs.legacyPackages.${system};
+        overlays = [(import inputs.rust-overlay)];
+        pkgs = import inputs.nixpkgs {
+          inherit system overlays;
+        };
+        rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
       in rec {
         packages = rec {
           # Build with `nix build`
@@ -21,6 +21,7 @@
           wrap = let
             cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
           in
+            # TODO: this doesn't match the developer cargo version
             pkgs.rustPlatform.buildRustPackage {
               pname = "wrap";
               version = cargoToml.package.version;
@@ -52,9 +53,10 @@
 
         # Enter with `nix develop`
         devShells.default = pkgs.mkShell {
-          buildInputs = [
-            pkgs.cargo
-            pkgs.cargo-deny
+          buildInputs = with pkgs; [
+            rust
+            # cargo
+            cargo-deny
           ];
 
           shellHook = ''
@@ -65,7 +67,7 @@
           RUST_BACKTRACE = 1;
         };
 
-        formatter = nixpkgs.legacyPackages.${system}.alejandra;
+        formatter = pkgs.alejandra;
       }
     );
 }
