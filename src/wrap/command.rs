@@ -7,10 +7,10 @@ pub struct Command {
     pub arguments: Vec<String>,
 }
 
-impl Into<exec::Command> for Command {
-    fn into(self) -> exec::Command {
-        let mut cmd = exec::Command::new(self.program);
-        cmd.args(&self.arguments);
+impl From<Command> for exec::Command {
+    fn from(val: Command) -> Self {
+        let mut cmd = exec::Command::new(val.program);
+        cmd.args(&val.arguments);
 
         cmd
     }

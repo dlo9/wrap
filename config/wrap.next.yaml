@@ -65,7 +65,7 @@ aliases:
 
     # The format to use for alias and program flags (optional)
     #
-    # This config sets the number of hypens to prepend to flag names. If a flag already starts
+    # This config sets the number of hyphens to prepend to flag names. If a flag already starts
     # with a hyphen, this value is ignored and the flag format for that flag becomes `raw`.
     #
     # Values:
@@ -140,7 +140,7 @@ aliases:
     # Flags for the alias (optional)
     #
     # These are flags supported by the alias, which can be thought of as "shortcuts".
-    # They can be used to pass multiple or longer flags to the underlaying program.
+    # They can be used to pass multiple or longer flags to the underlying program.
     flags:
 
       - # The flag's name

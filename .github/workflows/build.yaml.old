@@ -1,0 +1,210 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: self-hosted
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # - name: Install Nix
+      #   uses: DeterminateSystems/nix-installer-action@main
+      #   with:
+      #     kvm: false
+
+      # - name: Setup Nix Cache
+      #   uses: DeterminateSystems/magic-nix-cache-action@main
+      #   with:
+      #     upstream-cache: https://nix-serve.sigpanic.com
+
+      - name: Check Nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@main
+        with:
+          fail-mode: false
+
+      - name: Check Nix formatting
+        run: nix fmt -- -q .
+
+      - name: Check Rust formatting
+        run: nix develop --command cargo fmt --check
+
+      - name: Audit Rust code
+        run: nix develop --command cargo-deny check
+
+      - name: Check Clippy
+        run: nix develop --command cargo clippy -- --deny warnings
+
+      - name: Check spelling
+        run: nix develop --command codespell
+
+  build:
+    name: Build
+    runs-on: self-hosted
+    needs: lint
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # - name: Install Nix
+      #   uses: DeterminateSystems/nix-installer-action@main
+      #   with:
+      #     kvm: false
+
+      # - name: Setup Nix Cache
+      #   uses: DeterminateSystems/magic-nix-cache-action@main
+      #   with:
+      #     upstream-cache: https://nix-serve.sigpanic.com
+
+      - name: Setup Rust cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cargo build
+        run: nix develop --command cargo build
+
+  test:
+    name: Test
+    runs-on: self-hosted
+    needs: build
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # - name: Install Nix
+      #   uses: DeterminateSystems/nix-installer-action@main
+      #   with:
+      #     kvm: false
+
+      # - name: Setup Nix Cache
+      #   uses: DeterminateSystems/magic-nix-cache-action@main
+      #   with:
+      #     upstream-cache: https://nix-serve.sigpanic.com
+
+      - name: Setup Rust cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cargo test
+        run: nix develop --command cargo test
+
+  create-release:
+    name: Create Release
+    runs-on: self-hosted
+    needs: test
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Latest Release
+        id: changelog
+        shell: bash
+        run: |
+          changelog="CHANGELOG.md"
+
+          # Parse the release versions from existing tags and the changelog
+          # TODO: accept prelease versions
+          latestGithubRelease="$(git tag -l --sort=-refname '[0-9]*\.[0-9]*\.[0-9]*' | head -1)"
+          latestChangelogRelease="$(sed -r 's!^## \[([0-9]+\.[0-9]+.[0-9]+)\].*!\1!; T d; :q q; :d d;' "$changelog")"
+
+          # Skip if there's no new release
+          if [[ -z "$latestChangelogRelease" ]] || [[ "$latestGithubRelease" == "$latestChangelogRelease" ]]; then
+            exit
+          fi
+
+          changes="$(awk -v version="$latestChangelogRelease" '/^$/ { next } /[0-9]+\.[0-9]+\.[0-9]+/ { IN_VERSION=0 } IN_VERSION { print } $0 ~ "^## \\[" version "\\]" { IN_VERSION=1; }' "$changelog")"
+
+          echo "version=$latestChangelogRelease" >> "$GITHUB_OUTPUT"
+          echo "changes=$changes" >> "$GITHUB_OUTPUT"
+
+      # - name: Install Nix
+      #   if: steps.changelog.outputs.version != ''
+      #   uses: DeterminateSystems/nix-installer-action@main
+      #   with:
+      #     kvm: false
+
+      # - name: Setup Nix Cache
+      #   if: steps.changelog.outputs.version != ''
+      #   uses: DeterminateSystems/magic-nix-cache-action@main
+      #   with:
+      #     upstream-cache: https://nix-serve.sigpanic.com
+
+      - name: Setup Rust cache
+        if: steps.changelog.outputs.version != ''
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Release
+        if: steps.changelog.outputs.version != ''
+        run: nix develop --command cargo build --release
+
+      - name: Rename Release Artifacts
+        if: steps.changelog.outputs.version != ''
+        id: artifacts
+        run: |
+          # Formatted name
+          name="wrap-${{ steps.changelog.outputs.version }}-${{ runner.os }}-${{ runner.arch }}"
+
+          # Make lowercase
+          name="$(echo "$name" | tr '[:upper:]' '[:lower:]')"
+
+          # Do the rename
+          mv target/release/wrap "$name"
+
+          # Save to output
+          echo "name=$name" >> "$GITHUB_OUTPUT"
+
+      - name: Create Release
+        if: steps.changelog.outputs.version != ''
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: false
+          artifactErrorsFailBuild: true
+          artifacts: ${{ steps.artifacts.outputs.name }}
+          body: ${{ steps.changelog.outputs.changes }}
+          tag: ${{ steps.changelog.outputs.version }}
+          makeLatest: true
+          prerelease: false

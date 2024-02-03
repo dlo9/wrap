@@ -50,7 +50,7 @@ impl ArgumentParser {
         variables.get(name).map(|s| s.as_str()).unwrap_or_default()
     }
 
-    fn get_positional<'a>(index: usize, positionals: &'a [String]) -> Result<&'a String> {
+    fn get_positional(index: usize, positionals: &[String]) -> Result<&String> {
         positionals
             .get(index)
             .ok_or(anyhow!("Missing positional #{}", index + 1))
@@ -92,7 +92,7 @@ impl TryFrom<IndexMap<String, String>> for Variables {
         for (key, value) in config_variables {
             if !variables.contains_key(&key) {
                 // Expand variables as we insert them
-                let expanded = ArgumentParser::expand(&value, &variables, &vec![])?.0;
+                let expanded = ArgumentParser::expand(&value, &variables, &[])?.0;
                 variables.insert(key, expanded);
             }
         }
@@ -102,7 +102,7 @@ impl TryFrom<IndexMap<String, String>> for Variables {
 }
 
 impl Variables {
-    pub fn apply(&self, arguments: &Vec<String>) -> Result<Vec<String>> {
+    pub fn apply(&self, arguments: &[String]) -> Result<Vec<String>> {
         let mut output = Vec::with_capacity(arguments.len());
 
         let mut arguments_to_skip = 0;
@@ -118,7 +118,7 @@ impl Variables {
                 &arguments[0..0]
             };
 
-            let results = ArgumentParser::expand(&argument, &self.0, positionals)?;
+            let results = ArgumentParser::expand(argument, &self.0, positionals)?;
             output.push(results.0);
             arguments_to_skip = results.1;
         }
@@ -142,7 +142,7 @@ mod test {
     fn expand__empty_input__empty_output() {
         let input = "";
         let expected = (input.to_string(), 0);
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &[]).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -150,7 +150,7 @@ mod test {
     fn expand__literal_input__literal_output() {
         let input = "nothing special here";
         let expected = (input.to_string(), 0);
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &[]).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -158,7 +158,7 @@ mod test {
     fn expand__escaped_input__escape_removed() {
         let input = r#"A bunch of escapes: \\ \$ \~"#;
         let expected = (r#"A bunch of escapes: \ $ ~"#.to_string(), 0);
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &[]).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -166,7 +166,7 @@ mod test {
     fn expand__invalid_escape_input__error() {
         let input = r#"Invalid escape: \2"#;
         let expected = "Argument parsing failed";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+        let actual = ArgumentParser::expand(input, &vars(), &[])
             .unwrap_err()
             .to_string();
         assert_eq!(expected, actual);
@@ -176,7 +176,7 @@ mod test {
     fn expand__missing_escapable_input__error() {
         let input = r#"Missing escape: \"#;
         let expected = "Argument parsing failed";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+        let actual = ArgumentParser::expand(input, &vars(), &[])
             .unwrap_err()
             .to_string();
         assert_eq!(expected, actual);
@@ -186,7 +186,7 @@ mod test {
     fn expand__variable_input__replaced_output() {
         let input = "${VAR1}";
         let expected = ("var1_output".to_string(), 0);
-        let actual = ArgumentParser::expand(input, &vars(), &vec![]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &[]).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -194,7 +194,7 @@ mod test {
     fn expand__one_positional_input__replaced_output_one_skipped() {
         let input = "The first positional is: $#";
         let expected = ("The first positional is: first".to_string(), 1);
-        let actual = ArgumentParser::expand(input, &vars(), &vec!["first".to_string()]).unwrap();
+        let actual = ArgumentParser::expand(input, &vars(), &["first".to_string()]).unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -202,12 +202,9 @@ mod test {
     fn expand__two_positional_inputs__replaced_output_one_skipped() {
         let input = "The first positional is: $#, ${#}";
         let expected = ("The first positional is: first, second".to_string(), 2);
-        let actual = ArgumentParser::expand(
-            input,
-            &vars(),
-            &vec!["first".to_string(), "second".to_string()],
-        )
-        .unwrap();
+        let actual =
+            ArgumentParser::expand(input, &vars(), &["first".to_string(), "second".to_string()])
+                .unwrap();
         assert_eq!(expected, actual);
     }
 
@@ -215,7 +212,7 @@ mod test {
     fn expand__missing_positional__error() {
         let input = "The first positional is: $#";
         let expected = "Missing positional #1";
-        let actual = ArgumentParser::expand(input, &vars(), &vec![])
+        let actual = ArgumentParser::expand(input, &vars(), &[])
             .unwrap_err()
             .to_string();
         assert_eq!(expected, actual);

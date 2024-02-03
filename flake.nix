@@ -55,8 +55,8 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             rust
-            # cargo
             cargo-deny
+            codespell
           ];
 
           shellHook = ''
