@@ -61,7 +61,7 @@ commands:
 
     # The format to use for alias and program flags (optional)
     #
-    # This config sets the number of hypens to prepend to flag names. If a flag already starts
+    # This config sets the number of hyphens to prepend to flag names. If a flag already starts
     # with a hyphen, this value is ignored and the flag format for that flag becomes `raw`.
     #
     # Values:

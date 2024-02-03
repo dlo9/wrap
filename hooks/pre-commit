@@ -10,7 +10,15 @@ cleanup() {
 trap cleanup EXIT
 
 # Stash unstaged changes
-git stash -q --keep-index
+git stash -q --keep-index -u
+
+# Run clippy
+cargo clippy --fix --allow-staged
+cargo clippy -- --deny warnings
+
+# Run clippy
+cargo clippy --fix --allow-staged
+cargo clippy -- --deny warnings
 
 # Format Nix
 nix fmt -- -q .

@@ -13,7 +13,7 @@ pub struct Config {
     pub aliases: Aliases,
 }
 
-const CONFIG_FILE_NAME: &'static str = "wrap";
+const CONFIG_FILE_NAME: &str = "wrap";
 
 impl Config {
     pub fn new<'a>(
@@ -28,7 +28,7 @@ impl Config {
             config = config.add_source(File::with_name(&path.to_string_lossy()).required(true));
         }
 
-        // Otherwise, use defult paths
+        // Otherwise, use default paths
         if search_for_config {
             // Start off by merging in the global configuration file
             // TODO: linux only

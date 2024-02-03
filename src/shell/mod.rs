@@ -48,7 +48,7 @@ fn get_shell() -> Result<Shell> {
         env::var("SHELL").context("Could not determine current shell. Is SHELL set?")?;
 
     let (_, shell) = shell_path
-        .rsplit_once("/")
+        .rsplit_once('/')
         .with_context(|| format!("Failed to get shell from SHELL path: {}", shell_path))?;
 
     str::parse::<Shell>(shell)

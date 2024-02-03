@@ -10,7 +10,7 @@ Unlike `alias`, it supports:
 ## Configuration
 Wrap uses config files to define aliases. Multiple formats are supported, including `yaml`, `toml`, and `json`.
 `yaml` is the recommended format and will be used in all examples. `wrap` reads its configuration in two ways:
-1. By default, all config locations are read and marged, with more specific configurations overridding values
+1. By default, all config locations are read and marged, with more specific configurations overriding values
    in less specific configurations. Config files can be specified in the following locations and merged in order:
    - Global config: `/etc/wrap.yaml`
    - User config: `~/.config/wrap.yaml`
