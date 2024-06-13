@@ -40,7 +40,7 @@ jobs:
       - name: Audit Rust Code
         run: nix develop --command cargo-deny check
 
-      - name: Check for outdated dependencies
+      - name: Check for Outdated Dependencies
         run: nix develop --command cargo outdated -R
 
       # Requires nightly to run, ignoring for now

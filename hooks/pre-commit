@@ -12,19 +12,30 @@ trap cleanup EXIT
 # Stash unstaged changes
 git stash -q --keep-index -u
 
-# Run clippy
-cargo clippy --fix --allow-staged
-cargo clippy -- --deny warnings
+# Check Spelling
+codespell
 
-# Run clippy
-cargo clippy --fix --allow-staged
-cargo clippy -- --deny warnings
-
-# Format Nix
+# Check Nix Formatting
 nix fmt -- -q .
 
-# Format Rust
+# Check Rust Formatting
 cargo fmt
+
+# Audit Rust Code
+cargo-deny check
+
+# Check for Outdated Dependencies
+cargo outdated -R --exit-code 1
+
+# Check Clippy
+cargo clippy --fix --allow-staged
+cargo clippy -- --deny warnings
+
+# Cargo Build
+cargo build
+
+# Cargo Test
+cargo test
 
 # Stage updated files
 git add -u
