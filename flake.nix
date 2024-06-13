@@ -55,7 +55,9 @@
         devShells.default = pkgs.mkShell {
           buildInputs = with pkgs; [
             rust
-            cargo-deny
+            cargo-deny # Dependency linting (lincensing/banning) & Security vulerabilities
+            cargo-outdated # Outdatated dependencies
+            #cargo-udeps # Unused dependencies - requires nightly to run
             codespell
           ];
 
