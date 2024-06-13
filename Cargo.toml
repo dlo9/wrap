@@ -38,3 +38,9 @@ shell-escape = "0.1"
 
 [dev-dependencies]
 serde_yaml = "0.9"
+
+[patch.crates-io]
+# Fix security advisory
+# Remove after https://github.com/mehcode/config-rs/issues/563
+config = { git = "https://github.com/mehcode/config-rs" }
+# yaml-rust = { version = "0.8", package = "yaml-rust2" }
