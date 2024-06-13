@@ -40,6 +40,13 @@ jobs:
       - name: Audit Rust Code
         run: nix develop --command cargo-deny check
 
+      - name: Check for outdated dependencies
+        run: nix develop --command cargo outdated -R
+
+      # Requires nightly to run, ignoring for now
+      # - name: Check for unused dependencies
+      #   run: nix develop --command cargo udeps
+
       - name: Check Clippy
         run: nix develop --command cargo clippy -- --deny warnings
 
