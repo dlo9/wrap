@@ -104,12 +104,14 @@ commands:
           #
           # raw: false
 
-          # Values to
-          values: ["1"]
-          overrides: [p]  # `partitions` override automatically added
+          # Values to pass
+          values: [ "1" ]
+          overrides: [ p ]  # Extra keys that can be used to override this one
+
         - key: topic
-          value: $1
-          multiple: true  # `topic` override not added
+          value: $1 # Requires a value
+          multiple: true  # This key can be given multiple times
+
     arguments:
       # strict: no pass-through allowed
       #mode: strict
