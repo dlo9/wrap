@@ -7,7 +7,7 @@ license = "MIT"
 
 [dependencies]
 # Command line arguments
-clap = { version = "4.0.0", features = [
+clap = { version = "4", features = [
     "color",
     "derive",
     "suggestions",
@@ -18,8 +18,8 @@ clap = { version = "4.0.0", features = [
 # TODO: use a version again once it's published
 config = "0.14.0"
 dirs = "5"
-serde_derive = "1.0"
-serde = "1.0"
+serde_derive = "1"
+serde = "1"
 
 # Logging/debugging
 color-backtrace = "0.6"
