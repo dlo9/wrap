@@ -65,12 +65,12 @@ jobs:
 
           changes="$(awk -v version="$latestChangelogRelease" '/^$/ { next } /[0-9]+\.[0-9]+\.[0-9]+/ { IN_VERSION=0 } IN_VERSION { print } $0 ~ "^## \\[" version "\\]" { IN_VERSION=1; }' "$changelog")"
 
-          echo "version=$latestChangelogRelease" >> "$GITHUB_OUTPUT"
-          echo "changes=$changes" >> "$GITHUB_OUTPUT"
+          printf "%s=%s\n" "version" "$latestChangelogRelease" >> "$GITHUB_OUTPUT"
+          printf "%s<<EOF\n%s\nEOF\n" "changes" "$changes" >> "$GITHUB_OUTPUT"
 
       - name: Build Release
         if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
-        run: nix develop --command cargo build --release
+        run: devenv shell cargo build --release
 
       - name: Rename Release Artifacts
         if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
@@ -86,7 +86,7 @@ jobs:
           mv target/release/wrap "$name"
 
           # Save to output
-          echo "name=$name" >> "$GITHUB_OUTPUT"
+          printf "%s=%s\n" "name" "$name" >> "$GITHUB_OUTPUT"
 
       - name: Create Release
         if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
@@ -97,5 +97,6 @@ jobs:
           artifacts: ${{ steps.artifacts.outputs.name }}
           body: ${{ steps.changelog.outputs.changes }}
           tag: ${{ steps.changelog.outputs.version }}
+          commit: main
           makeLatest: true
           prerelease: false
