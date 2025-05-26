@@ -1,6 +1,6 @@
 [package]
 name = "wrap"
-version = "0.4.0"
+version = "0.4.1"
 authors = ["David Orchard <if_coding@fastmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -15,14 +15,13 @@ clap = { version = "4", features = [
 ] }
 
 # Config
-# TODO: use a version again once it's published
-config = "0.14.0"
-dirs = "5"
+config = "0.15.0"
+dirs = "6"
 serde_derive = "1"
 serde = "1"
 
 # Logging/debugging
-color-backtrace = "0.6"
+color-backtrace = "0.7"
 log = "0.4"
 pretty_env_logger = "0.5"
 
@@ -38,9 +37,3 @@ shell-escape = "0.1"
 
 [dev-dependencies]
 serde_yaml = "0.9"
-
-[patch.crates-io]
-# Fix security advisory
-# Remove after https://github.com/mehcode/config-rs/issues/563
-config = { git = "https://github.com/mehcode/config-rs" }
-# yaml-rust = { version = "0.8", package = "yaml-rust2" }

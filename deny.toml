@@ -1,3 +1,13 @@
 [licenses]
-unlicensed = "allow"
-allow = ["MIT", "Apache-2.0", "Unicode-DFS-2016", "CC0-1.0", "ISC", "BSD-3-Clause"]
+unused-allowed-license = "allow"
+
+allow = [
+  "Apache-2.0",
+  "BSD-3-Clause",
+  "ISC",
+  "MIT",
+  "MPL-2.0",
+  "Unicode-3.0",
+  "Unicode-DFS-2016",
+  "Zlib"
+]
