@@ -28,10 +28,10 @@ jobs:
       #  with:
       #    fail-mode: false
 
-      - name: Setup cachix
-        uses: cachix/cachix-action@v14
-        with:
-          name: devenv
+      #- name: Setup cachix
+      #  uses: cachix/cachix-action@v14
+      #  with:
+      #    name: devenv
 
       - name: Install devenv
         run: nix profile install nixpkgs#devenv
