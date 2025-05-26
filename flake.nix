@@ -1,57 +1,43 @@
 {
+  description = "A small utility to wrap other commands. Like `alias`, but better.";
+
   inputs = {
-    nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
-    flake-utils.url = "github:numtide/flake-utils";
-    rust-overlay.url = "github:oxalica/rust-overlay";
+    flake-parts.url = "github:hercules-ci/flake-parts";
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = {self, ...} @ inputs:
-    inputs.flake-utils.lib.eachDefaultSystem (
-      system: let
-        overlays = [(import inputs.rust-overlay)];
-        pkgs = import inputs.nixpkgs {
-          inherit system overlays;
-        };
-        rust = pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml;
-      in rec {
-        packages = rec {
-          # Build with `nix build`
-          default = wrap;
+  outputs = inputs @ {flake-parts, ...}:
+    flake-parts.lib.mkFlake {inherit inputs;} {
+      systems = ["x86_64-linux" "aarch64-linux" "aarch64-darwin" "x86_64-darwin"];
 
-          wrap = let
-            cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-          in
-            # TODO: this doesn't match the developer cargo version
-            pkgs.rustPlatform.buildRustPackage {
-              pname = "wrap";
-              version = cargoToml.package.version;
+      perSystem = {
+        config,
+        self',
+        inputs',
+        pkgs,
+        system,
+        ...
+      }: {
+        packages.default = let
+          cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+        in
+          pkgs.rustPlatform.buildRustPackage {
+            pname = "wrap";
+            version = cargoToml.package.version;
 
-              src = ./.;
-              release = true;
+            src = ./.;
+            release = true;
 
-              cargoLock = {
-                lockFile = ./Cargo.lock;
-              };
-
-              meta = with pkgs.lib; {
-                description = "A small utility to wrap other commands. Like `alias`, but better.";
-                homepage = "https://github.com/dlo9/wrap";
-                license = cargoToml.package.license;
-              };
+            cargoLock = {
+              lockFile = ./Cargo.lock;
             };
-        };
 
-        apps = rec {
-          # Run with `nix run`
-          apps.default = wrap;
-
-          wrap = {
-            type = "app";
-            program = "${packages.default}/bin/wrap";
+            meta = with pkgs.lib; {
+              description = "A small utility to wrap other commands. Like `alias`, but better.";
+              homepage = "https://github.com/dlo9/wrap";
+              license = cargoToml.package.license;
+            };
           };
-        };
-
-        formatter = pkgs.alejandra;
-      }
-    );
+      };
+    };
 }
