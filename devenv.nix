@@ -26,7 +26,7 @@
 
     codespell = {
       enable = true;
-      name = "Check spelling";
+      description = "Check spelling";
       entry = "codespell";
       extraPackages = with pkgs; [
         codespell
@@ -35,7 +35,7 @@
 
     cargo-deny = {
       enable = true;
-      name = "Lint dependencies";
+      description = "Lint dependencies";
       entry = "cargo-deny check";
       pass_filenames = false;
       extraPackages = with pkgs; [
@@ -45,7 +45,7 @@
 
     cargo-outdated = {
       enable = true;
-      name = "Check for outdated dependencies";
+      description = "Check for outdated dependencies";
       entry = "cargo outdated -R --exit-code 1";
       pass_filenames = false;
       extraPackages = with pkgs; [
@@ -56,7 +56,7 @@
 
     cargo-build = {
       enable = true;
-      name = "Cargo build";
+      description = "Build rust code";
       entry = "cargo build";
       pass_filenames = false;
       extraPackages = with pkgs; [
@@ -66,7 +66,7 @@
 
     cargo-test = {
       enable = true;
-      name = "Cargo test";
+      description = "Execute rust tests";
       entry = "cargo test";
       after = ["cargo-build"];
       pass_filenames = false;
