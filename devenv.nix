@@ -14,9 +14,12 @@
     # Nix formatting
     alejandra.enable = true;
 
-    # Check clippy
+    # Lint rust
     clippy.enable = true;
     clippy.settings.denyWarnings = true;
+
+    # Lint shell scripts
+    shellcheck.enable = true;
 
     # Format rust
     rustfmt.enable = true;
