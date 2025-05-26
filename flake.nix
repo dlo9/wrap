@@ -51,24 +51,6 @@
           };
         };
 
-        # Enter with `nix develop`
-        devShells.default = pkgs.mkShell {
-          buildInputs = with pkgs; [
-            rust
-            cargo-deny # Dependency linting (lincensing/banning) & Security vulnerabilities
-            cargo-outdated # Outdatated dependencies
-            #cargo-udeps # Unused dependencies - requires nightly to run
-            codespell
-          ];
-
-          shellHook = ''
-            # Setup git hooks
-            ln -srf hooks/* .git/hooks/
-          '';
-
-          RUST_BACKTRACE = 1;
-        };
-
         formatter = pkgs.alejandra;
       }
     );
