@@ -23,29 +23,33 @@
         ...
       }: {
         overlayAttrs = {
-          inherit (config.packages) default;
+          inherit (config.packages) wrap;
         };
 
-        packages.default = let
-          cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
-        in
-          pkgs.rustPlatform.buildRustPackage {
-            pname = "wrap";
-            version = cargoToml.package.version;
+        packages = rec {
+          default = config.packages.wrap;
 
-            src = ./.;
-            release = true;
+          wrap = let
+            cargoToml = builtins.fromTOML (builtins.readFile ./Cargo.toml);
+          in
+            pkgs.rustPlatform.buildRustPackage {
+              pname = "wrap";
+              version = cargoToml.package.version;
 
-            cargoLock = {
-              lockFile = ./Cargo.lock;
+              src = ./.;
+              release = true;
+
+              cargoLock = {
+                lockFile = ./Cargo.lock;
+              };
+
+              meta = with pkgs.lib; {
+                description = "A small utility to wrap other commands. Like `alias`, but better.";
+                homepage = "https://github.com/dlo9/wrap";
+                license = cargoToml.package.license;
+              };
             };
-
-            meta = with pkgs.lib; {
-              description = "A small utility to wrap other commands. Like `alias`, but better.";
-              homepage = "https://github.com/dlo9/wrap";
-              license = cargoToml.package.license;
-            };
-          };
+        };
       };
     };
 }
