@@ -20,13 +20,13 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Nix
-        uses: DeterminateSystems/determinate-nix-action@v3.6.1
-
       #- name: Check Nixpkgs Inputs
       #  uses: DeterminateSystems/flake-checker-action@v9
       #  with:
       #    fail-mode: false
+
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3.6.1
 
       #- name: Setup cachix
       #  uses: cachix/cachix-action@v14
@@ -35,6 +35,10 @@ jobs:
 
       - name: Install devenv
         run: nix profile install nixpkgs#devenv
+
+      # Ensure rustc is available for the rust cache step
+      - name: Setup PATH
+        run: devenv shell 'echo $PATH' >> $GITHUB_PATH
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
