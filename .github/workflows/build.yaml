@@ -23,10 +23,10 @@ jobs:
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3.6.1
 
-      - name: Check Nixpkgs Inputs
-        uses: DeterminateSystems/flake-checker-action@v9
-        with:
-          fail-mode: false
+      #- name: Check Nixpkgs Inputs
+      #  uses: DeterminateSystems/flake-checker-action@v9
+      #  with:
+      #    fail-mode: false
 
       - name: Setup cachix
         uses: cachix/cachix-action@v14
