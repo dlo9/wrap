@@ -43,7 +43,7 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Build & test
+      - name: Build and Test
         run: devenv test
 
       - name: Get Latest Release
