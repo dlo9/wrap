@@ -20,41 +20,27 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Install Nix
+        uses: DeterminateSystems/determinate-nix-action@v3.6.1
+
       - name: Check Nixpkgs Inputs
-        uses: DeterminateSystems/flake-checker-action@main
+        uses: DeterminateSystems/flake-checker-action@v9
         with:
           fail-mode: false
 
-      - name: Check Spelling
-        run: nix develop --command codespell
+      - name: Setup cachix
+        uses: cachix/cachix-action@v14
+        with:
+          name: devenv
 
-      - name: Check Nix Formatting
-        run: nix fmt -- -q .
+      - name: Install devenv
+        run: nix profile install nixpkgs#devenv
 
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Check Rust Formatting
-        run: nix develop --command cargo fmt --check
-
-      - name: Audit Rust Code
-        run: nix develop --command cargo-deny check
-
-      - name: Check for Outdated Dependencies
-        run: nix develop --command cargo outdated -R
-
-      # Requires nightly to run, ignoring for now
-      # - name: Check for unused dependencies
-      #   run: nix develop --command cargo udeps
-
-      - name: Check Clippy
-        run: nix develop --command cargo clippy -- --deny warnings
-
-      - name: Cargo Build
-        run: nix develop --command cargo build
-
-      - name: Cargo Test
-        run: nix develop --command cargo test
+      - name: Build & test
+        run: devenv test
 
       - name: Get Latest Release
         id: changelog
