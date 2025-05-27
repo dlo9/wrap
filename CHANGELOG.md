@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.5] - 2025-05-27
+
+### Changed
+
+- Preserve variable order
+
 ## [0.4.4] - 2025-05-26
 
 ### Changed
