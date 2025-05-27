@@ -1,6 +1,6 @@
 [package]
 name = "wrap"
-version = "0.4.4"
+version = "0.4.5"
 authors = ["David Orchard <if_coding@fastmail.com>"]
 edition = "2021"
 license = "MIT"
@@ -15,7 +15,7 @@ clap = { version = "4", features = [
 ] }
 
 # Config
-config = "0.15.0"
+config = { version = "0.15.0", features = ["preserve_order"] }
 dirs = "6"
 serde_derive = "1"
 serde = "1"
