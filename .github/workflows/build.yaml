@@ -26,7 +26,7 @@ jobs:
       #    fail-mode: false
 
       - name: Install Nix
-        uses: DeterminateSystems/determinate-nix-action@v3.6.1
+        uses: DeterminateSystems/determinate-nix-action@v3.8.2
 
       #- name: Setup cachix
       #  uses: cachix/cachix-action@v14
