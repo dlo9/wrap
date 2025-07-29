@@ -33,7 +33,7 @@ impl Config {
             // Start off by merging in the global configuration file
             // TODO: linux only
             config = config
-                .add_source(File::with_name(&format!("/etc/{}", CONFIG_FILE_NAME)).required(false));
+                .add_source(File::with_name(&format!("/etc/{CONFIG_FILE_NAME}")).required(false));
 
             // Add in the user's config
             // This doesn't use config_dir since it's a weird path on MacOS
