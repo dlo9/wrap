@@ -6,7 +6,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
   };
 
-  outputs = inputs @ {flake-parts, ...}:
+  outputs = inputs @ {self, flake-parts, ...}:
     flake-parts.lib.mkFlake {inherit inputs;} {
       imports = [
         inputs.flake-parts.flakeModules.easyOverlay
@@ -36,7 +36,7 @@
               pname = "wrap";
               version = cargoToml.package.version;
 
-              src = ./.;
+              src = inputs.self;
               release = true;
 
               cargoLock = {
