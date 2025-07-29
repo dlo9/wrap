@@ -49,7 +49,7 @@ fn get_shell() -> Result<Shell> {
 
     let (_, shell) = shell_path
         .rsplit_once('/')
-        .with_context(|| format!("Failed to get shell from SHELL path: {}", shell_path))?;
+        .with_context(|| format!("Failed to get shell from SHELL path: {shell_path}"))?;
 
     str::parse::<Shell>(shell)
 }

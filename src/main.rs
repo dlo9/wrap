@@ -78,7 +78,7 @@ fn main() -> Result<()> {
     let command = alias.get_command(args.args, &mut config.variables)?;
 
     if dry_run {
-        println!("{}", command);
+        println!("{command}");
         Ok(())
     } else {
         let mut command: exec::Command = command.into();

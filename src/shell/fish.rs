@@ -6,7 +6,7 @@ use std::path::PathBuf;
 pub fn alias(aliases: &[String]) -> Result<()> {
     let mut contents = String::new();
     for alias in aliases {
-        contents.push_str(&format!("alias {0}=\"wrap {0}\"\n", alias));
+        contents.push_str(&format!("alias {alias}=\"wrap {alias}\"\n"));
     }
 
     let path = get_config_file_path()?;
