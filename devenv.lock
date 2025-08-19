@@ -3,10 +3,10 @@
     "devenv": {
       "locked": {
         "dir": "src/modules",
-        "lastModified": 1753765820,
+        "lastModified": 1755536966,
         "owner": "cachix",
         "repo": "devenv",
-        "rev": "bcf3b8e29b8614ad38c34966cd52baf7f8e168b7",
+        "rev": "062a852197de9aa96204c5b4b01d149e3c44ffb6",
         "type": "github"
       },
       "original": {
@@ -24,10 +24,10 @@
         "rust-analyzer-src": "rust-analyzer-src"
       },
       "locked": {
-        "lastModified": 1753771482,
+        "lastModified": 1755499663,
         "owner": "nix-community",
         "repo": "fenix",
-        "rev": "8b6da138fb7baefa04a4284c63b2abefdfbd2c6d",
+        "rev": "d1ff4457857ad551e8d6c7c79324b44fac518b8b",
         "type": "github"
       },
       "original": {
@@ -60,10 +60,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1750779888,
+        "lastModified": 1755446520,
         "owner": "cachix",
         "repo": "git-hooks.nix",
-        "rev": "16ec914f6fb6f599ce988427d9d94efddf25fe6d",
+        "rev": "4b04db83821b819bbbe32ed0a025b31e7971f22e",
         "type": "github"
       },
       "original": {
@@ -94,10 +94,10 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1750441195,
+        "lastModified": 1754299112,
         "owner": "cachix",
         "repo": "devenv-nixpkgs",
-        "rev": "0ceffe312871b443929ff3006960d29b120dc627",
+        "rev": "16c21c9f5c6fb978466e91182a248dd8ca1112ac",
         "type": "github"
       },
       "original": {
@@ -122,10 +122,10 @@
     "rust-analyzer-src": {
       "flake": false,
       "locked": {
-        "lastModified": 1753724566,
+        "lastModified": 1755504847,
         "owner": "rust-lang",
         "repo": "rust-analyzer",
-        "rev": "511c999bea1c3c129b8eba713bb9b809a9003d00",
+        "rev": "a905e3b21b144d77e1b304e49f3264f6f8d4db75",
         "type": "github"
       },
       "original": {
@@ -142,10 +142,10 @@
         ]
       },
       "locked": {
-        "lastModified": 1753757591,
+        "lastModified": 1755571033,
         "owner": "oxalica",
         "repo": "rust-overlay",
-        "rev": "b372cf71b4125d420d7648cbd898ab8f5c355be2",
+        "rev": "95487740bb7ac11553445e9249041a6fa4b5eccf",
         "type": "github"
       },
       "original": {
