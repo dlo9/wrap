@@ -30,6 +30,8 @@
           inherit (config.packages) wrap;
         };
 
+        formatter = pkgs.alejandra;
+
         packages = rec {
           default = config.packages.wrap;
 
