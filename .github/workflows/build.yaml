@@ -20,18 +20,8 @@ jobs:
         with:
           fetch-depth: 0
 
-      #- name: Check Nixpkgs Inputs
-      #  uses: DeterminateSystems/flake-checker-action@v9
-      #  with:
-      #    fail-mode: false
-
       - name: Install Nix
         uses: DeterminateSystems/determinate-nix-action@v3.6.1
-
-      #- name: Setup cachix
-      #  uses: cachix/cachix-action@v14
-      #  with:
-      #    name: devenv
 
       - name: Install devenv
         run: nix profile install nixpkgs#devenv
@@ -43,8 +33,11 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
+      - name: Lint
+        run: devenv shell 'just lint'
+
       - name: Build and Test
-        run: devenv test
+        run: devenv shell 'just test'
 
       - name: Get Latest Release
         id: changelog
