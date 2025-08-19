@@ -18,6 +18,7 @@
     pkg-config
     openssl
     just
+    alejandra
     codespell
     cargo
     cargo-outdated
