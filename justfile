@@ -15,6 +15,9 @@ format:
 # Basic checks
 alias check := lint
 lint:
+    # Check rust
+    cargo check
+
     # Check spelling
     codespell
 
@@ -47,6 +50,9 @@ update:
 
 fix: && format update
     cargo clippy --fix --allow-staged --allow-dirty
+
+build:
+    cargo build
 
 test:
     cargo test
