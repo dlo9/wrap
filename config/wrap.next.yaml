@@ -120,7 +120,7 @@ aliases:
           # argument provides the value.
           #
           # This may contain variables.
-          values: []
+          default-values: []
 
           # Flags which override this one when specified later in the command (optional)
           #
@@ -172,10 +172,20 @@ aliases:
         #
         # Unless overridden by a later alias flag, these will override program flags. They
         # may contain values, which may contain positionals defined above via `$positional_name`
-        provides:
+        sets:
+          # Set a boolean flag
+          - flag: dry-run
+
+          # Remove a boolean flag
+          - flag: dry-run
+            action: remove
+            # remove: true
+
           - flag: topic
             values: [$topic]
-          - flag: dry-run
+
+          - env: DEBUG
+            value: true
 
         # If user confirmation is required before running the command (optional)
         #
