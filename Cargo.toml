@@ -15,7 +15,7 @@ clap = { version = "4", features = [
 ] }
 
 # Config
-config = { version = "0.15.16", features = ["preserve_order"] }
+config = { version = "0.15.17", features = ["preserve_order"] }
 dirs = "6"
 serde_derive = "1"
 serde = "1"
