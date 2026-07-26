@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Persist Cargo's registry and build caches on the runner host. The runner's
+# StateDirectory (/var/lib/gitea-runner) survives across runs, so repeat builds
+# reuse the downloaded crate registry and compiled artifacts instead of starting
+# from scratch — this replaces the GitHub-only Swatinem/rust-cache action. The
+# paths sit outside the per-run workspace so they aren't wiped between jobs.
+env:
+  CARGO_HOME: /var/lib/gitea-runner/ci-cache/cargo-home
+  CARGO_TARGET_DIR: /var/lib/gitea-runner/ci-cache/cargo-target
+
+jobs:
+  build:
+    name: Build
+    runs-on: native
+    outputs:
+      version: ${{ steps.changelog.outputs.version }}
+      changes: ${{ steps.changelog.outputs.changes }}
+      artifact: ${{ steps.artifacts.outputs.name }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      # Warm the devenv profile once so its one-time evaluation cost is billed
+      # here, not to the first real step. Later `devenv shell` calls reuse the
+      # cached .devenv/ profile.
+      - name: Set up devenv
+        run: devenv shell true
+
+      - name: Lint
+        run: devenv shell 'just lint'
+
+      - name: Build and Test
+        run: devenv shell 'just test'
+
+      - name: Get Latest Release
+        id: changelog
+        if: github.ref == 'refs/heads/main'
+        shell: bash
+        run: |
+          changelog="CHANGELOG.md"
+
+          # Parse the release versions from existing tags and the changelog
+          # TODO: accept prelease versions
+          latestGitRelease="$(git tag -l --sort=-refname '[0-9]*\.[0-9]*\.[0-9]*' | head -1)"
+          latestChangelogRelease="$(sed -r 's!^## \[([0-9]+\.[0-9]+.[0-9]+)\].*!\1!; T d; :q q; :d d;' "$changelog")"
+
+          # Skip if there's no new release
+          if [[ -z "$latestChangelogRelease" ]] || [[ "$latestGitRelease" == "$latestChangelogRelease" ]]; then
+            exit
+          fi
+
+          changes="$(awk -v version="$latestChangelogRelease" '/^$/ { next } /[0-9]+\.[0-9]+\.[0-9]+/ { IN_VERSION=0 } IN_VERSION { print } $0 ~ "^## \\[" version "\\]" { IN_VERSION=1; }' "$changelog")"
+
+          printf "%s=%s\n" "version" "$latestChangelogRelease" >> "$GITHUB_OUTPUT"
+          printf "%s<<EOF\n%s\nEOF\n" "changes" "$changes" >> "$GITHUB_OUTPUT"
+
+      - name: Build Release
+        if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
+        run: devenv shell 'cargo build --release'
+
+      - name: Rename Release Artifacts
+        if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
+        id: artifacts
+        run: |
+          # Formatted name
+          name="wrap-${{ steps.changelog.outputs.version }}-${{ runner.os }}-${{ runner.arch }}"
+
+          # Make lowercase
+          name="$(echo "$name" | tr '[:upper:]' '[:lower:]')"
+
+          # Do the rename (release build lands in the host-persistent target dir)
+          mv "${CARGO_TARGET_DIR}/release/wrap" "$name"
+
+          # Save to output
+          printf "%s=%s\n" "name" "$name" >> "$GITHUB_OUTPUT"
+
+      - name: Upload artifact
+        if: github.ref == 'refs/heads/main' && steps.changelog.outputs.version != ''
+        uses: forgejo/upload-artifact@v5
+        with:
+          name: ${{ steps.artifacts.outputs.name }}
+          path: ${{ steps.artifacts.outputs.name }}
+
+  release:
+    name: Release
+    # Runs in a container, not native: the forgejo-release action's script
+    # apt-get-installs jq/curl and assumes a Debian userland, which the native
+    # NixOS runner doesn't provide. This job only publishes the release, so a
+    # container costs nothing here.
+    runs-on: self-hosted
+    needs: build
+    if: github.ref == 'refs/heads/main' && needs.build.outputs.version != ''
+    steps:
+      - name: Download artifact
+        uses: forgejo/download-artifact@v7
+        with:
+          name: ${{ needs.build.outputs.artifact }}
+          path: release
+
+      - name: Create Release
+        uses: actions/forgejo-release@v2.13.4
+        with:
+          url: ${{ github.server_url }}
+          repo: ${{ github.repository }}
+          tag: ${{ needs.build.outputs.version }}
+          # Create the tag from the commit that was built. The Forgejo release
+          # API creates the git tag at this commitish when it doesn't yet exist.
+          sha: ${{ github.sha }}
+          direction: upload
+          release-dir: release
+          release-notes: ${{ needs.build.outputs.changes }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+          prerelease: false
+          override: true
